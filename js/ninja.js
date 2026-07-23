@@ -347,10 +347,10 @@
       var t = document.getElementById("wrap-target");
       if (t) { t.style.top = TARGET_PCT + "%"; t.classList.add("hit"); }
       markDone("packaging");
-      feedback("fb-burger", true, "<strong>Готово!</strong> Нижний край Воппера лёг ровно на линию сгиба «Воппер».");
+      feedback("fb-burger", true, "<strong>Готово!</strong> Нижний край Воппера лёг ровно на линию «Воппер».");
     } else {
       var dir = bottomPct > TARGET_PCT ? "выше" : "ниже";
-      feedback("fb-burger", false, "", "<strong>Пока мимо.</strong> Смотри на бумагу: нижний край Воппера должен лечь на нужную линию сгиба. Сдвинь чуть " + dir + ".");
+      feedback("fb-burger", false, "", "<strong>Пока мимо.</strong> Смотри на бумагу: нижний край Воппера должен лечь на нужную линию. Сдвинь чуть " + dir + ".");
     }
   };
 
