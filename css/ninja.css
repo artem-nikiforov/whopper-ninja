@@ -1,0 +1,265 @@
+/* ════════════════════════════════════════════════════════════════════════
+   Воппер Ниндзя — стили курса поверх DS.
+   Только токены KU (--ku-*). Ничего сырого. Тёмная тема задаётся на <html>.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Патч тёмной темы для bk-base ───────────────────────────────────────
+   В DS трек bk-base жёстко задаёт светлые --ku-surface/-2/divider со
+   специфичностью (0,2,0), перебивая [data-theme="dark"] (0,1,0). Курс —
+   «тёмный целиком», поэтому возвращаем тёмные поверхности селектором
+   большей специфичности (0,3,0). Ядро DS не трогаем. */
+:root[data-audience="bk-base"][data-theme="dark"] {
+  --ku-surface:   var(--ku__night-800);
+  --ku-surface-2: var(--ku__night-700);
+  --ku-divider:   color-mix(in srgb, var(--ku__cream-100) 12%, transparent);
+  --ku-grad-brand-soft: linear-gradient(135deg,
+    color-mix(in srgb, var(--ku-brand) 22%, var(--ku__night-800)), var(--ku__night-800));
+}
+
+/* ── Ниндзя-акцент на обложке ──────────────────────────────────────────── */
+.nj-hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 85% -10%,
+      color-mix(in srgb, var(--ku-brand) 26%, transparent), transparent 60%),
+    var(--ku__night-950, #100b07);
+}
+.nj-hero .ku-wrap { position: relative; z-index: 1; }
+.nj-mask {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  opacity: .5;
+  color: color-mix(in srgb, var(--ku-brand) 60%, transparent);
+}
+.nj-eyebrow-dot {
+  display: inline-block; width: .5em; height: .5em; border-radius: var(--ku-radius-pill);
+  background: var(--ku-brand); margin-inline-end: .5em; vertical-align: middle;
+}
+
+/* ── Видео 16:9 ────────────────────────────────────────────────────────── */
+.nj-video {
+  position: relative; padding-top: 56.25%;
+  border-radius: var(--ku-radius-l); overflow: hidden;
+  border: 1px solid var(--ku-border);
+  background: var(--ku-surface-2);
+  box-shadow: var(--ku-shadow-m);
+}
+.nj-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+/* ══ ИГРА «СОБЕРИ ВОППЕР» ═══════════════════════════════════════════════ */
+.nj-build { display: grid; gap: var(--ku-space-m); }
+
+/* Платформа-стойка, где растёт бургер */
+.nj-stage {
+  position: relative;
+  min-height: 15rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  gap: .18rem;
+  padding: var(--ku-space-m) var(--ku-space-s) var(--ku-space-s);
+  border-radius: var(--ku-radius-l);
+  border: 1.5px dashed var(--ku-border);
+  background:
+    linear-gradient(180deg, transparent, color-mix(in srgb, var(--ku-brand) 7%, transparent));
+  transition: border-color var(--ku-dur-fast) var(--ku-ease),
+              background-color var(--ku-dur-fast) var(--ku-ease);
+}
+.nj-stage.drag-over {
+  border-color: var(--ku-brand);
+  border-style: solid;
+  background: color-mix(in srgb, var(--ku-brand) 12%, transparent);
+}
+.nj-stage__hint {
+  position: absolute; inset: 0; margin: auto; height: max-content; width: max-content;
+  color: var(--ku-text-muted); font-size: var(--ku-fs-small, .9rem); text-align: center;
+  pointer-events: none;
+}
+.nj-stage.has-items .nj-stage__hint { display: none; }
+
+/* Слой в стойке */
+.nj-layer {
+  width: min(20rem, 82%);
+  display: flex; align-items: center; gap: .6rem;
+  padding: .32rem .7rem;
+  border-radius: var(--ku-radius-m);
+  background: var(--ku-surface-2);
+  border: 1px solid var(--ku-border-soft);
+  color: var(--ku-text);
+  font-weight: 600; font-size: .88rem;
+  cursor: pointer;
+  animation: nj-drop var(--ku-dur-base) var(--ku-ease-spring);
+}
+.nj-layer:hover { border-color: var(--ku-brand); }
+.nj-layer.wrong { border-color: var(--ku-danger); background: var(--ku-danger-soft); }
+.nj-layer .nj-gly { flex: 0 0 auto; }
+.nj-layer__rm {
+  margin-inline-start: auto; color: var(--ku-text-muted);
+  display: inline-flex;
+}
+@keyframes nj-drop { from { opacity: 0; transform: translateY(-.6rem) scale(.96); } to { opacity: 1; transform: none; } }
+
+/* Пул ингредиентов */
+.nj-pool {
+  display: flex; flex-wrap: wrap; gap: .55rem; justify-content: center;
+  padding: var(--ku-space-s);
+  border-radius: var(--ku-radius-l);
+  background: var(--ku-surface);
+  border: 1px solid var(--ku-border-soft);
+  min-height: 3.5rem;
+}
+.nj-chip {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .45rem .8rem;
+  border-radius: var(--ku-radius-pill);
+  background: var(--ku-card);
+  border: 1px solid var(--ku-border);
+  color: var(--ku-text); font-weight: 600; font-size: .88rem;
+  cursor: grab; user-select: none; touch-action: none;
+  box-shadow: var(--ku-shadow-xs);
+  transition: transform var(--ku-dur-fast) var(--ku-ease-spring),
+              border-color var(--ku-dur-fast) var(--ku-ease),
+              box-shadow var(--ku-dur-fast) var(--ku-ease), opacity var(--ku-dur-fast) var(--ku-ease);
+}
+.nj-chip:hover { border-color: var(--ku-brand); transform: translateY(-2px); box-shadow: var(--ku-shadow-s); }
+.nj-chip:active { cursor: grabbing; }
+.nj-chip.is-dragging { opacity: .35; }
+.nj-chip .nj-gly { flex: 0 0 auto; }
+
+/* Клон-призрак при перетаскивании */
+.nj-ghost {
+  position: fixed; z-index: 60; pointer-events: none;
+  transform: translate(-50%, -50%) scale(1.04);
+  box-shadow: var(--ku-shadow-l);
+}
+
+/* Глиф ингредиента */
+.nj-gly { width: 1.9rem; height: 1.15rem; display: inline-block; border-radius: 4px; }
+
+/* Ряд управления игрой */
+.nj-controls { display: flex; flex-wrap: wrap; gap: var(--ku-space-2xs); align-items: center; }
+
+/* Полоски раунда */
+.nj-rounds { display: flex; gap: .5rem; }
+.nj-round-pill {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .3rem .7rem; border-radius: var(--ku-radius-pill);
+  font-size: .8rem; font-weight: 600;
+  border: 1px solid var(--ku-border); color: var(--ku-text-muted);
+  background: var(--ku-surface);
+}
+.nj-round-pill.active { color: var(--ku-brand-on); background: var(--ku-brand); border-color: transparent; }
+.nj-round-pill.done { color: var(--ku-success); border-color: color-mix(in srgb, var(--ku-success) 45%, transparent); }
+
+/* ══ ИГРА «УПАКОВКА» ════════════════════════════════════════════════════ */
+.nj-pack-step { display: none; }
+.nj-pack-step.active { display: block; }
+
+.nj-paper-stage {
+  position: relative; width: 100%; max-width: 30rem; margin-inline: auto;
+  aspect-ratio: 1 / 1;
+  display: grid; place-items: center;
+  border-radius: var(--ku-radius-l);
+  background:
+    repeating-linear-gradient(45deg,
+      color-mix(in srgb, var(--ku-text) 4%, transparent) 0 10px,
+      transparent 10px 20px),
+    var(--ku-surface);
+  border: 1px solid var(--ku-border-soft);
+  overflow: hidden;
+}
+.nj-paper {
+  width: 86%; height: auto; display: block; cursor: pointer;
+  border-radius: 6px;
+  box-shadow: var(--ku-shadow-m);
+  transition: transform var(--ku-dur-slow) var(--ku-ease-spring);
+  transform: rotate(var(--nj-rot, 0deg));
+}
+.nj-paper:focus-visible { outline: 3px solid var(--ku-brand); outline-offset: 3px; }
+.nj-paper-badge {
+  position: absolute; left: 50%; bottom: .7rem; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .3rem .7rem; border-radius: var(--ku-radius-pill);
+  background: color-mix(in srgb, var(--ku__night-950, #100b07) 70%, transparent);
+  color: var(--ku-text); font-size: .78rem; font-weight: 600;
+  border: 1px solid var(--ku-border); pointer-events: none;
+}
+.nj-arrow-to {
+  position: absolute; left: 50%; bottom: -.2rem; transform: translateX(-50%);
+  color: var(--ku-brand); font-size: .74rem; font-weight: 700; letter-spacing: .04em;
+  display: flex; flex-direction: column; align-items: center; pointer-events: none;
+}
+
+/* Свайп бургера по бумаге */
+.nj-wrap-stage {
+  position: relative; width: 100%; max-width: 30rem; margin-inline: auto;
+  border-radius: var(--ku-radius-l); overflow: hidden;
+  border: 1px solid var(--ku-border-soft);
+  touch-action: none;
+  user-select: none;
+}
+.nj-wrap-paper { width: 100%; display: block; }
+.nj-target-line {
+  position: absolute; left: 6%; right: 6%; height: 0;
+  border-top: 2.5px dashed var(--ku-brand);
+  pointer-events: none;
+}
+.nj-target-line::after {
+  content: attr(data-label);
+  position: absolute; right: 0; top: -1.3em;
+  font-size: .72rem; font-weight: 800; color: var(--ku-brand);
+  background: color-mix(in srgb, var(--ku__night-950, #100b07) 55%, transparent);
+  padding: 0 .35em; border-radius: 4px;
+}
+.nj-burger {
+  position: absolute; left: 50%; top: 80%;
+  width: 30%; transform: translate(-50%, -50%);
+  cursor: grab; touch-action: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45));
+  transition: filter var(--ku-dur-fast) var(--ku-ease);
+}
+.nj-burger:active { cursor: grabbing; }
+.nj-burger.snapped { filter: drop-shadow(0 0 0 transparent) drop-shadow(0 6px 10px rgba(0,0,0,.45)); }
+.nj-hint-drag {
+  position: absolute; left: 50%; bottom: .6rem; transform: translateX(-50%);
+  color: var(--ku-text); font-size: .78rem; font-weight: 600;
+  background: color-mix(in srgb, var(--ku__night-950, #100b07) 65%, transparent);
+  padding: .3rem .7rem; border-radius: var(--ku-radius-pill);
+  border: 1px solid var(--ku-border); pointer-events: none;
+  display: inline-flex; align-items: center; gap: .4rem;
+}
+
+/* ══ РЕЗУЛЬТАТЫ / ВИДЕО-АКТИВНОСТИ ══════════════════════════════════════ */
+.nj-result-row {
+  display: flex; align-items: center; gap: .7rem;
+  padding: .7rem .9rem; border-radius: var(--ku-radius-m);
+  border: 1px solid var(--ku-border); background: var(--ku-surface);
+}
+.nj-result-row .nj-r-ico {
+  flex: 0 0 auto; width: 2rem; height: 2rem; border-radius: var(--ku-radius-pill);
+  display: grid; place-items: center; color: #fff;
+}
+.nj-result-row.pass .nj-r-ico { background: var(--ku-success); }
+.nj-result-row.fail .nj-r-ico { background: var(--ku-danger); }
+.nj-result-row__t { font-weight: 700; }
+.nj-result-row__s { font-size: .84rem; color: var(--ku-text-muted); }
+
+.nj-vid-card {
+  border: 1px solid var(--ku-border); border-radius: var(--ku-radius-l);
+  background: var(--ku-card); padding: var(--ku-space-s);
+  display: flex; flex-direction: column; gap: .5rem;
+}
+.nj-vid-card.req { border-color: color-mix(in srgb, var(--ku-brand) 55%, transparent); }
+.nj-vid-card.done { border-color: color-mix(in srgb, var(--ku-success) 55%, transparent); }
+.nj-vid-card__top { display: flex; align-items: center; gap: .5rem; }
+.nj-vid-card__title { font-weight: 700; }
+.nj-tag {
+  margin-inline-start: auto; font-size: .72rem; font-weight: 800; letter-spacing: .03em;
+  padding: .18rem .55rem; border-radius: var(--ku-radius-pill);
+  text-transform: uppercase;
+}
+.nj-tag.req { background: var(--ku-brand); color: var(--ku-brand-on); }
+.nj-tag.opt { background: var(--ku-surface-2); color: var(--ku-text-muted); }
+.nj-tag.done { background: var(--ku-success); color: #fff; }
+
+@media (max-width: 640px) {
+  .nj-layer { width: 92%; }
+  .nj-chip { font-size: .82rem; }
+}
