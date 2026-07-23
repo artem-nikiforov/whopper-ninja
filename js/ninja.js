@@ -50,7 +50,7 @@
     for (var i = 0; i < n; i++) s += '<circle cx="' + (2 + step * (i + 1)) + '" cy="9" r="' + (n > 2 ? 2.4 : 4) + '" fill="' + c + '"/>';
     return s + '</svg>';
   }
-  function spiral() { return '<svg class="nj-gly" viewBox="0 0 30 18"><path d="M15 9 m-6 0 a6 6 0 1 1 6 6 a4 4 0 1 1-4-4 a2 2 0 1 1 2 2" fill="none" stroke="#111" stroke-width="2"/></svg>'; }
+  function spiral() { return '<svg class="nj-gly nj-gly--sauce" viewBox="0 0 30 18"><rect x="2" y="3" width="26" height="12" rx="6" fill="#efe6cf"/><path d="M15 9 m-5 0 a5 5 0 1 1 5 5 a3.2 3.2 0 1 1-3.2-3.2 a1.6 1.6 0 1 1 1.6 1.6" fill="none" stroke="#12100e" stroke-width="1.7"/></svg>'; }
   function slab(c) { return '<svg class="nj-gly" viewBox="0 0 30 18"><rect x="2" y="4" width="26" height="10" rx="5" fill="' + c + '"/></svg>'; }
 
   /* ══ ИГРА 1 — СОБЕРИ ВОППЕР ════════════════════════════════════════════ */
@@ -89,8 +89,8 @@
     layer.setAttribute("data-key", key);
     layer.innerHTML = ing.gly + "<span>" + ing.label + "</span>" +
       '<span class="nj-layer__rm"><svg class="ku-ico s"><use href="#i-x"/></svg></span>';
-    layer.addEventListener("click", function () { undo(key); });
-    stage.insertBefore(layer, stage.querySelector(".nj-layer") || null); // новый — сверху
+    layer.querySelector(".nj-layer__rm").addEventListener("click", function () { undo(key); });
+    stage.appendChild(layer); // новый ложится ВНИЗ стопки: порядок сверху-вниз = порядок сборки
     stage.classList.add("has-items");
     if (asm.placed.length === ING.length && asm.round === 2) njAsmCheck();
   }
@@ -104,7 +104,7 @@
     pool.appendChild(makeChip(key));
   }
 
-  /* Перетаскивание клоном (mouse + touch) с фолбэком «тап = поставить». */
+  /* Перетаскивание клоном (mouse + touch). Только drag — тап ничего не ставит. */
   function attachDrag(chip, key) {
     var ghost = null, moved = false, sx = 0, sy = 0;
     chip.addEventListener("pointerdown", function (e) {
@@ -135,8 +135,7 @@
       stage.classList.remove("drag-over");
       chip.classList.remove("is-dragging");
       if (ghost) { ghost.remove(); ghost = null; }
-      if (!moved) { place(key); return; }              // тап
-      if (overStage(e.clientX, e.clientY)) place(key);  // дроп на платформу
+      if (moved && overStage(e.clientX, e.clientY)) place(key);  // только дроп на платформу
     }
   }
   function overStage(x, y) {

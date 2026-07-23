@@ -133,6 +133,8 @@
 
 /* Глиф ингредиента */
 .nj-gly { width: 1.9rem; height: 1.15rem; display: inline-block; border-radius: 4px; }
+/* Соус Ниндзя — тёмный на тёмном, поэтому светлая подложка + ниндзя-свечение */
+.nj-gly--sauce { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ku-brand) 60%, transparent)); }
 
 /* Ряд управления игрой */
 .nj-controls { display: flex; flex-wrap: wrap; gap: var(--ku-space-2xs); align-items: center; }
