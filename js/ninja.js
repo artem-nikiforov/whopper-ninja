@@ -53,16 +53,36 @@
   function spiral() { return '<svg class="nj-gly nj-gly--sauce" viewBox="0 0 30 18"><rect x="2" y="3" width="26" height="12" rx="6" fill="#efe6cf"/><path d="M15 9 m-5 0 a5 5 0 1 1 5 5 a3.2 3.2 0 1 1-3.2-3.2 a1.6 1.6 0 1 1 1.6 1.6" fill="none" stroke="#12100e" stroke-width="1.7"/></svg>'; }
   function slab(c) { return '<svg class="nj-gly" viewBox="0 0 30 18"><rect x="2" y="4" width="26" height="10" rx="5" fill="' + c + '"/></svg>'; }
 
-  /* ══ ИГРА 1 — СОБЕРИ ВОППЕР ════════════════════════════════════════════ */
+  /* ══ ИГРА 1 — СОБЕРИ ВОППЕР ════════════════════════════════════════════
+     asm.placed — ключи в порядке стопки (index 0 — верхний слой, последний —
+     нижний). Правильный порядок — это ПОСЛЕДОВАТЕЛЬНОСТЬ слоёв; направление
+     не важно (сборка идёт снизу вверх), поэтому эталон засчитывается и в
+     прямом, и в обратном прочтении. Ингредиент можно перетащить на любую
+     позицию, в т.ч. МЕЖДУ уже добавленными; поставленный слой можно перетащить
+     на новое место или убрать крестиком. */
   var asm = { round: 1, placed: [], timer: null, timeLeft: 40, running: false };
-  var stage, pool;
+  var stage, pool, poolOrder = [], gapEl = null;
 
   function shuffled(arr) { arr = arr.slice(); for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; }
+  function eqArr(a, b) { return a.length === b.length && a.every(function (v, i) { return v === b[i]; }); }
+  function missCount(a, b) { var n = 0; for (var i = 0; i < a.length; i++) if (a[i] !== b[i]) n++; return n; }
+
+  function initPoolOrder() { poolOrder = shuffled(ING).map(function (i) { return i.key; }); }
 
   function renderPool() {
     pool.innerHTML = "";
-    shuffled(ING).forEach(function (ing) { pool.appendChild(makeChip(ing.key)); });
+    poolOrder.forEach(function (key) {
+      if (asm.placed.indexOf(key) === -1) pool.appendChild(makeChip(key));
+    });
   }
+  function renderStack() {
+    stage.querySelectorAll(".nj-layer").forEach(function (n) { n.remove(); });
+    asm.placed.forEach(function (key) { stage.appendChild(makeLayer(key)); });
+    stage.classList.toggle("has-items", asm.placed.length > 0);
+  }
+  function render() { renderStack(); renderPool(); }
+  function clearAll() { asm.placed = []; render(); }
+
   function makeChip(key) {
     var ing = byKey[key];
     var b = document.createElement("button");
@@ -70,100 +90,124 @@
     b.className = "nj-chip";
     b.setAttribute("data-key", key);
     b.innerHTML = ing.gly + "<span>" + ing.label + "</span>";
-    attachDrag(b, key);
+    attachDrag(b, key, false);
     return b;
   }
-  function clearStage() {
-    stage.querySelectorAll(".nj-layer").forEach(function (n) { n.remove(); });
-    stage.classList.remove("has-items");
-  }
-
-  function place(key) {
-    if (asm.placed.indexOf(key) !== -1) return;
-    var chip = pool.querySelector('.nj-chip[data-key="' + key + '"]');
-    if (chip) chip.remove();
-    asm.placed.push(key);
+  function makeLayer(key) {
     var ing = byKey[key];
     var layer = document.createElement("div");
     layer.className = "nj-layer";
     layer.setAttribute("data-key", key);
     layer.innerHTML = ing.gly + "<span>" + ing.label + "</span>" +
-      '<span class="nj-layer__rm"><svg class="ku-ico s"><use href="#i-x"/></svg></span>';
-    layer.querySelector(".nj-layer__rm").addEventListener("click", function () { undo(key); });
-    stage.appendChild(layer); // новый ложится ВНИЗ стопки: порядок сверху-вниз = порядок сборки
-    stage.classList.add("has-items");
-    if (asm.placed.length === ING.length && asm.round === 2) njAsmCheck();
+      '<button type="button" class="nj-layer__rm" aria-label="Убрать"><svg class="ku-ico s"><use href="#i-x"/></svg></button>';
+    layer.querySelector(".nj-layer__rm").addEventListener("click", function (e) { e.stopPropagation(); removeKey(key); });
+    attachDrag(layer, key, true);
+    return layer;
   }
-  function undo(key) {
+  function removeKey(key) {
     var i = asm.placed.indexOf(key);
     if (i === -1) return;
     asm.placed.splice(i, 1);
-    var layer = stage.querySelector('.nj-layer[data-key="' + key + '"]');
-    if (layer) layer.remove();
-    if (!asm.placed.length) stage.classList.remove("has-items");
-    pool.appendChild(makeChip(key));
+    render();
   }
 
-  /* Перетаскивание клоном (mouse + touch). Только drag — тап ничего не ставит. */
-  function attachDrag(chip, key) {
+  /* Перетаскивание клоном (mouse + touch). Источник — чип из набора или
+     уже поставленный слой (fromStack). Дроп на платформу вставляет элемент на
+     позицию под курсором (между слоями). Только drag — тап ничего не ставит. */
+  function attachDrag(el, key, fromStack) {
     var ghost = null, moved = false, sx = 0, sy = 0;
-    chip.addEventListener("pointerdown", function (e) {
+    el.addEventListener("pointerdown", function (e) {
       if (e.button != null && e.button !== 0) return;
+      if (e.target.closest(".nj-layer__rm")) return; // крестик — не начинаем drag
       moved = false; sx = e.clientX; sy = e.clientY;
-      try { chip.setPointerCapture(e.pointerId); } catch (_) {}
+      try { el.setPointerCapture(e.pointerId); } catch (_) {}
       document.addEventListener("pointermove", onMove);
       document.addEventListener("pointerup", onUp);
     });
     function onMove(e) {
-      var dx = e.clientX - sx, dy = e.clientY - sy;
-      if (!moved && Math.hypot(dx, dy) < 6) return;
-      moved = true;
-      if (!ghost) {
-        ghost = chip.cloneNode(true);
-        ghost.className = "nj-chip nj-ghost";
+      if (!moved && Math.hypot(e.clientX - sx, e.clientY - sy) < 6) return;
+      if (!moved) {
+        moved = true;
+        ghost = buildGhost(key);
         document.body.appendChild(ghost);
-        chip.classList.add("is-dragging");
+        el.classList.add("is-dragging");
+        if (fromStack) {                          // вынимаем слой из стопки на время переноса
+          var i = asm.placed.indexOf(key);
+          if (i !== -1) { asm.placed.splice(i, 1); renderStack(); }
+        }
       }
       ghost.style.left = e.clientX + "px";
       ghost.style.top = e.clientY + "px";
       var over = overStage(e.clientX, e.clientY);
       stage.classList.toggle("drag-over", over);
+      if (over) showGap(insertIndexAt(e.clientY)); else hideGap();
     }
     function onUp(e) {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
       stage.classList.remove("drag-over");
-      chip.classList.remove("is-dragging");
+      el.classList.remove("is-dragging");
       if (ghost) { ghost.remove(); ghost = null; }
-      if (moved && overStage(e.clientX, e.clientY)) place(key);  // только дроп на платформу
+      if (!moved) { hideGap(); return; }
+      var over = overStage(e.clientX, e.clientY);
+      var idx = over ? insertIndexAt(e.clientY) : -1;
+      hideGap();
+      if (over) { asm.placed.splice(idx, 0, key); render(); afterPlace(); }
+      else render();   // вне платформы: из стопки — вернётся в набор, из набора — без изменений
     }
+  }
+  function buildGhost(key) {
+    var ing = byKey[key];
+    var g = document.createElement("div");
+    g.className = "nj-chip nj-ghost";
+    g.innerHTML = ing.gly + "<span>" + ing.label + "</span>";
+    return g;
   }
   function overStage(x, y) {
     var r = stage.getBoundingClientRect();
     return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
   }
+  function insertIndexAt(y) {
+    var layers = Array.prototype.slice.call(stage.querySelectorAll(".nj-layer"));
+    for (var i = 0; i < layers.length; i++) {
+      var r = layers[i].getBoundingClientRect();
+      if (y < r.top + r.height / 2) return i;
+    }
+    return layers.length;
+  }
+  function showGap(idx) {
+    hideGap();
+    gapEl = document.createElement("div");
+    gapEl.className = "nj-gap";
+    var layers = stage.querySelectorAll(".nj-layer");
+    if (idx >= layers.length) stage.appendChild(gapEl);
+    else stage.insertBefore(gapEl, layers[idx]);
+  }
+  function hideGap() { if (gapEl) { gapEl.remove(); gapEl = null; } }
+  function afterPlace() { if (asm.placed.length === ING.length && asm.round === 2) njAsmCheck(); }
 
   window.njAsmReset = function () {
     if (asm.timer) { clearInterval(asm.timer); asm.timer = null; }
-    asm.placed = []; asm.running = false;
-    clearStage(); renderPool();
+    asm.running = false;
+    initPoolOrder(); clearAll();
     var fb = document.getElementById("fb-asm"); if (fb) fb.className = "ku-feedback";
     if (asm.round === 2) resetTimerBadge();
   };
 
   window.njAsmCheck = function () {
-    var order = asm.placed.map(function (k) { return byKey[k].idx; });
-    var full = asm.placed.length === ING.length;
-    var ok = full && order.every(function (v, i) { return v === CORRECT[i]; });
+    var arr = asm.placed.map(function (k) { return byKey[k].idx; });
+    var full = arr.length === ING.length;
+    var rev = CORRECT.slice().reverse();
+    var ok = full && (eqArr(arr, CORRECT) || eqArr(arr, rev));
 
     if (asm.round === 1) {
-      if (!full) { feedback("fb-asm", false, "", "<strong>Пока не всё.</strong> Поставь все 8 ингредиентов на платформу."); return; }
+      if (!full) { feedback("fb-asm", false, "", "<strong>Пока не всё.</strong> Поставь на платформу все 8 ингредиентов."); return; }
       if (ok) {
         feedback("fb-asm", true, "<strong>Верный порядок!</strong> Теперь собери то же самое на время.");
         goRound2();
       } else {
-        markWrongTop();
-        feedback("fb-asm", false, "", "<strong>Порядок сбит.</strong> Вспомни: верхняя булочка вниз, соус — после томата, снизу — нижняя булочка. Поправь и проверь снова.");
+        markWrong();
+        feedback("fb-asm", false, "", "<strong>Порядок сбит.</strong> Соус — сразу после томата, огурцы — перед котлетой, булочки — по краям. Поправь и проверь снова.");
       }
       return;
     }
@@ -175,18 +219,19 @@
       markDone("assembly");
       feedback("fb-asm", true, "<strong>Готово, и вовремя!</strong> Сборку Воппера ты знаешь.");
     } else {
-      markWrongTop();
-      feedback("fb-asm", false, "", "<strong>Почти!</strong> Порядок неверный — сбрось лишнее и поправь, пока идёт время.");
+      markWrong();
+      feedback("fb-asm", false, "", "<strong>Почти!</strong> Порядок неверный — поправь слои местами, пока идёт время.");
     }
   };
 
-  function markWrongTop() {
-    var order = asm.placed.map(function (k) { return byKey[k].idx; });
-    var firstBad = -1;
-    for (var i = 0; i < order.length; i++) { if (order[i] !== CORRECT[i]) { firstBad = i; break; } }
-    if (firstBad === -1) return;
-    var key = asm.placed[firstBad];
-    var layer = stage.querySelector('.nj-layer[data-key="' + key + '"]');
+  function markWrong() {
+    var arr = asm.placed.map(function (k) { return byKey[k].idx; });
+    var rev = CORRECT.slice().reverse();
+    var target = missCount(arr, rev) < missCount(arr, CORRECT) ? rev : CORRECT;
+    var bad = -1;
+    for (var i = 0; i < arr.length; i++) { if (arr[i] !== target[i]) { bad = i; break; } }
+    if (bad === -1) return;
+    var layer = stage.querySelectorAll(".nj-layer")[bad];
     if (layer) { layer.classList.add("wrong", "ku-shake"); setTimeout(function () { layer.classList.remove("ku-shake"); }, 500); }
   }
 
@@ -211,7 +256,7 @@
   function pad(n) { return String(n).padStart(2, "0"); }
 
   window.njAsmStart = function () {
-    asm.placed = []; clearStage(); renderPool();
+    initPoolOrder(); clearAll();
     var fb = document.getElementById("fb-asm"); if (fb) fb.className = "ku-feedback";
     resetTimerBadge();
     asm.running = true;
@@ -399,7 +444,7 @@
   function init() {
     stage = document.getElementById("asm-stage");
     pool = document.getElementById("asm-pool");
-    if (pool) renderPool();
+    if (pool) { initPoolOrder(); renderPool(); }
     initPaper();
     initBurger();
     wrapNavigate();

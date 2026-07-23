@@ -85,16 +85,32 @@
   border: 1px solid var(--ku-border-soft);
   color: var(--ku-text);
   font-weight: 600; font-size: .88rem;
-  cursor: pointer;
+  cursor: grab; touch-action: none; user-select: none;
   animation: nj-drop var(--ku-dur-base) var(--ku-ease-spring);
 }
 .nj-layer:hover { border-color: var(--ku-brand); }
+.nj-layer:active { cursor: grabbing; }
+.nj-layer.is-dragging { opacity: .35; }
 .nj-layer.wrong { border-color: var(--ku-danger); background: var(--ku-danger-soft); }
 .nj-layer .nj-gly { flex: 0 0 auto; }
 .nj-layer__rm {
   margin-inline-start: auto; color: var(--ku-text-muted);
-  display: inline-flex;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.7rem; height: 1.7rem; padding: 0;
+  background: none; border: 0; border-radius: var(--ku-radius-pill);
+  cursor: pointer; transition: color var(--ku-dur-fast) var(--ku-ease), background-color var(--ku-dur-fast) var(--ku-ease);
 }
+.nj-layer__rm:hover { color: var(--ku-danger); background: var(--ku-danger-soft); }
+
+/* Индикатор места вставки при перетаскивании */
+.nj-gap {
+  width: min(20rem, 82%); height: 2.2rem;
+  border-radius: var(--ku-radius-m);
+  border: 2px dashed var(--ku-brand);
+  background: color-mix(in srgb, var(--ku-brand) 15%, transparent);
+  animation: nj-gap-in var(--ku-dur-fast) var(--ku-ease);
+}
+@keyframes nj-gap-in { from { opacity: 0; transform: scaleY(.5); } to { opacity: 1; transform: none; } }
 @keyframes nj-drop { from { opacity: 0; transform: translateY(-.6rem) scale(.96); } to { opacity: 1; transform: none; } }
 
 /* Пул ингредиентов */
