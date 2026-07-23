@@ -18,6 +18,7 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
   <symbol id="i-check-check" viewBox="0 0 24 24"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></symbol>
@@ -41,6 +42,7 @@
 <!-- ═══ ШАПКА С ПРОГРЕССОМ ═══ -->
 <header class="ku-topbar">
   <div class="ku-topbar__inner">
+    <button class="ku-btn ghost s nj-back" id="nj-back" onclick="njBack()" hidden><svg class="ku-ico"><use href="#i-left"/></svg> Назад</button>
     <span class="ku-topbar__brand"><svg class="ku-ico"><use href="#i-flame"/></svg> Воппер Ниндзя</span>
     <div class="ku-topbar__spacer"></div>
     <span class="ku-progress__count" id="ku-course-count"></span>
@@ -81,17 +83,17 @@
         <h2 class="ku-h2">Главы</h2>
         <div class="ku-space s"></div>
         <div class="ku-stack s">
-          <button class="ku-card ku-chapter" id="ku-home-card-1" style="width:100%;text-align:left" onclick="kuNavigate('ch1')">
+          <button class="ku-card ku-chapter" id="ku-home-card-1" style="width:100%;text-align:left" onclick="njGoChapter('ch1')">
             <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
             <div class="ku-chapter__num">1</div>
             <div class="ku-chapter__body"><h3>Соус «Чёрный Ниндзя»</h3><p>Видео · ~3 мин</p></div>
           </button>
-          <button class="ku-card ku-chapter locked" id="ku-home-card-2" style="width:100%;text-align:left" onclick="kuNavigate('ch2')">
+          <button class="ku-card ku-chapter locked" id="ku-home-card-2" style="width:100%;text-align:left" onclick="njGoChapter('ch2')">
             <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
             <div class="ku-chapter__num">2</div>
-            <div class="ku-chapter__body"><h3>Тест по соусу</h3><p>Короткая проверка</p></div>
+            <div class="ku-chapter__body"><h3>Тест по соусу</h3><p>5 вопросов</p></div>
           </button>
-          <button class="ku-card ku-chapter locked" id="ku-home-card-3" style="width:100%;text-align:left" onclick="kuNavigate('ch3')">
+          <button class="ku-card ku-chapter locked" id="ku-home-card-3" style="width:100%;text-align:left" onclick="njGoChapter('ch3')">
             <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
             <div class="ku-chapter__num">3</div>
             <div class="ku-chapter__body"><h3>Стандарты сборки и упаковки</h3><p>2 игры · сборка и упаковка</p></div>
@@ -111,20 +113,13 @@
         <div class="ku-space s"></div>
         <h2 class="ku-h1">Соус «Чёрный&nbsp;Ниндзя»</h2>
         <div class="ku-space s"></div>
-        <p class="ku-lead">Что за вкус месяца, почему он именно такой и как с ним работать: хранение, инвентарь, нанесение и лайфхак. Посмотри видео целиком.</p>
+        <p class="ku-lead">Новый вкус месяца! Почему выбран, из чего состоит, как с ним работать: хранение, инвентарь, правила нанесения. Смотри видео до конца, чтобы всё узнать.</p>
         <div class="ku-space m"></div>
 
         <div class="nj-video ku-reveal">
           <iframe title="whopper_ninja"
-            src="https://bktube.burgerkingrus.ru/videos/embed/9c8z7mbL9zYkTeJmjXDkva?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0"
+            data-src="https://bktube.burgerkingrus.ru/videos/embed/9c8z7mbL9zYkTeJmjXDkva?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0"
             allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
-        </div>
-        <div class="ku-space m"></div>
-
-        <div class="ku-callout ku-reveal">
-          <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-bulb"/></svg></span>
-          <div><div class="ku-callout__title">Коротко о главном</div>
-            <p>Широкий носик-сквизер и наклейка «Вкус месяца», FIFO и маркировка сроков. В Воппер — <strong>3 оборота, 14 г</strong>. Застрял в носике — постучи тубой дном о борт.</p></div>
         </div>
 
         <div class="next-row" style="margin-top:var(--ku-space-l);display:flex;justify-content:center">
@@ -143,16 +138,128 @@
         <span class="ku-eyebrow">Глава 2</span>
         <div class="ku-space s"></div>
         <h2 class="ku-h1">Тест по соусу</h2>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">Ответь на 5 вопросов и нажми «Проверить».</p>
         <div class="ku-space m"></div>
 
-        <div class="ku-callout info ku-reveal">
-          <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-bulb"/></svg></span>
-          <div><div class="ku-callout__title">Раздел в подготовке</div>
-            <p>Вопросы по соусу «Чёрный Ниндзя» добавим сюда позже. Пока просто переходи дальше — к стандартам сборки и упаковки.</p></div>
+        <div class="ku-exercise ku-reveal" data-ku-id="sauce-test" id="sauce-test">
+          <!-- Q1 -->
+          <div class="nj-q" data-q="1">
+            <div class="nj-q__text">1. Какой инструмент ты будешь использовать для соуса «Чёрный Ниндзя»?</div>
+            <div class="nj-choices">
+              <button type="button" class="nj-choice" data-correct="1"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Сквизер с широким носиком</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Сквизер с узким носиком</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Пистолет-дозатор</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Любой свободный сквизер</button>
+            </div>
+          </div>
+
+          <!-- Q2 -->
+          <div class="nj-q" data-q="2">
+            <div class="nj-q__text">2. Ты добавляешь соус и видишь, что на сквизере нет наклейки «Вкус Месяца». Как поступить?</div>
+            <div class="nj-choices">
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Добавить соус, если уверен, что в сквизере нужный соус</button>
+              <button type="button" class="nj-choice" data-correct="1"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Нанести на сквизер наклейку</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Перелить соус в другой сквизер с наклейкой</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Использовать соус, как обычно</button>
+            </div>
+          </div>
+
+          <!-- Q3 — сопоставление -->
+          <div class="nj-q" data-q="3">
+            <div class="nj-q__text">3. Сопоставь действие при работе с новым соусом с его целью</div>
+            <div class="nj-match">
+              <div class="nj-match__row">
+                <span class="nj-match__a">Наносить наклейку «Вкус месяца»</span>
+                <select class="ku-input nj-match__sel" data-correct="g1" aria-label="Цель для: наносить наклейку">
+                  <option value="">— выбери цель —</option>
+                  <option value="g1">Быстро найти нужный соус</option>
+                  <option value="g2">Понять, какой соус нужно добавить</option>
+                  <option value="g3">Отточить навык и отдать правильно собранное блюдо</option>
+                </select>
+              </div>
+              <div class="nj-match__row">
+                <span class="nj-match__a">Проверять вкус Воппера на экране VDU</span>
+                <select class="ku-input nj-match__sel" data-correct="g2" aria-label="Цель для: проверять VDU">
+                  <option value="">— выбери цель —</option>
+                  <option value="g1">Быстро найти нужный соус</option>
+                  <option value="g2">Понять, какой соус нужно добавить</option>
+                  <option value="g3">Отточить навык и отдать правильно собранное блюдо</option>
+                </select>
+              </div>
+              <div class="nj-match__row">
+                <span class="nj-match__a">Тренироваться наносить соус на весах</span>
+                <select class="ku-input nj-match__sel" data-correct="g3" aria-label="Цель для: тренироваться на весах">
+                  <option value="">— выбери цель —</option>
+                  <option value="g1">Быстро найти нужный соус</option>
+                  <option value="g2">Понять, какой соус нужно добавить</option>
+                  <option value="g3">Отточить навык и отдать правильно собранное блюдо</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Q4 -->
+          <div class="nj-q" data-q="4">
+            <div class="nj-q__text">4. Ты собираешь Воппер с соусом «Чёрный Ниндзя». Как правильно нанести соус?</div>
+            <div class="nj-choices">
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 2 оборота, 10 грамм</button>
+              <button type="button" class="nj-choice" data-correct="1"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 3 оборота, 14 грамм</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 6 вершин зигзагом, 14 грамм</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 2 оборота, 16 грамм</button>
+            </div>
+          </div>
+
+          <!-- Q5 -->
+          <div class="nj-q" data-q="5">
+            <div class="nj-q__text">5. Ты собираешь Воппер Ролл с соусом «Чёрный Ниндзя». Как правильно нанести соус?</div>
+            <div class="nj-choices">
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 3 оборота, 14 грамм</button>
+              <button type="button" class="nj-choice" data-correct="1"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 6 вершин зигзагом, 14 грамм</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 6 вершин зигзагом, 12 грамм</button>
+              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 2 оборота, 12 грамм</button>
+            </div>
+          </div>
+
+          <div class="ku-space s"></div>
+          <div class="nj-controls">
+            <button class="ku-btn primary" id="sauce-check" onclick="njSauceCheck()"><svg class="ku-ico"><use href="#i-check"/></svg> Проверить</button>
+          </div>
+          <div class="ku-feedback" id="fb-sauce"></div>
         </div>
 
-        <div class="next-row" style="margin-top:var(--ku-space-l);display:flex;justify-content:center">
-          <button class="ku-btn primary l" onclick="kuNavigate('ch3')">К стандартам <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+        <!-- После проверки: разбор, «Коротко о главном», кнопки -->
+        <div id="sauce-after" hidden>
+          <div class="ku-space l"></div>
+          <div class="ku-callout ku-reveal">
+            <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-bulb"/></svg></span>
+            <div>
+              <div class="ku-callout__title">Коротко о главном</div>
+              <ul class="nj-bullets">
+                <li>Используй сквизер с широким носиком</li>
+                <li>Размещай на сквизере наклейку «Вкус месяца»</li>
+                <li>Используй стандартные правила подготовки соуса, а если есть вопросы — смотри документ «Маркировка продукта сроком годности»</li>
+                <li>Добавляй соус: в Воппер — 3 оборота, 14 грамм; в ролл — 6 вершин зигзагом, 14 грамм</li>
+                <li>Перед стартом продаж потренируйся наносить соус на весах</li>
+                <li>Постучи дном тубы о борт, если соус застрял в носике</li>
+              </ul>
+            </div>
+          </div>
+
+          <div id="sauce-rec" hidden>
+            <div class="ku-space m"></div>
+            <div class="ku-callout warning">
+              <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-bulb"/></svg></span>
+              <div><div class="ku-callout__title">Рекомендация</div>
+                <p>Не все ответы верны — советуем пересмотреть видео по соусу, чтобы закрепить материал.</p></div>
+            </div>
+          </div>
+
+          <div class="ku-space l"></div>
+          <div class="nj-controls" style="justify-content:center">
+            <button class="ku-btn soft" onclick="kuNavigate('ch1')"><svg class="ku-ico"><use href="#i-play"/></svg> Посмотреть видео повторно</button>
+            <button class="ku-btn primary" onclick="kuNavigate('ch3')">Дальше <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+          </div>
         </div>
       </div>
     </section>
@@ -174,7 +281,7 @@
         <!-- ── ИГРА 1 — СОБЕРИ ВОППЕР ── -->
         <div class="ku-exercise ku-reveal" data-ku-id="assembly" id="asm">
           <div class="ku-exercise__label">Игра 1 · Собери Воппер</div>
-          <p class="ku-small ku-soft" id="asm-instr">Перетаскивай ингредиенты из набора на платформу и собери Воппер в правильном порядке. Ингредиент можно вставить между уже добавленными, а поставленный слой — перетащить на другое место или убрать крестиком.</p>
+          <p class="ku-small ku-soft" id="asm-instr">Перетаскивай или нажимай ингредиенты из набора, чтобы собрать Воппер в правильном порядке. Добавленные ингредиенты можно менять местами и размещать между уже добавленными слоями. Крестик — удалить ингредиент, «Сбросить» — начать сборку заново.</p>
           <div class="ku-space s"></div>
 
           <div class="nj-rounds" id="asm-rounds">
@@ -208,7 +315,7 @@
 
           <!-- Шаг 1: поворот бумаги -->
           <div class="nj-pack-step active" id="pack-step-1">
-            <p class="ku-small ku-soft">Разверни оберточную бумагу правильной стороной для сборки. Нажимай на лист, чтобы повернуть его на 90°, и подтверди.</p>
+            <p class="ku-small ku-soft">Разверни оберточную бумагу правильной стороной для сборки. Нажимай на лист, чтобы повернуть его, и подтверди.</p>
             <div class="ku-space s"></div>
             <div class="nj-paper-stage">
               <img class="nj-paper" id="pack-paper" src="assets/paper.png" alt="Оберточная бумага Burger King" tabindex="0" role="button" aria-label="Повернуть бумагу">
@@ -216,7 +323,8 @@
             </div>
             <div class="ku-space s"></div>
             <div class="nj-controls">
-              <button class="ku-btn primary s" onclick="njPaperConfirm()"><svg class="ku-ico"><use href="#i-check"/></svg> Подтвердить сторону</button>
+              <button class="ku-btn primary s" id="paper-confirm" onclick="njPaperConfirm()"><svg class="ku-ico"><use href="#i-check"/></svg> Подтвердить сторону</button>
+              <button class="ku-btn primary s" id="paper-next" style="display:none" onclick="njPaperNext()">Далее <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
             </div>
             <div class="ku-feedback" id="fb-paper"></div>
           </div>
@@ -248,8 +356,9 @@
           </div>
         </div>
 
-        <div class="next-row" style="margin-top:var(--ku-space-l);display:flex;justify-content:center">
-          <button class="ku-btn primary l" onclick="kuNavigate('results')">Проверить результаты <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+        <div class="next-row" style="margin-top:var(--ku-space-l);display:flex;flex-direction:column;align-items:center;gap:.6rem">
+          <button class="ku-btn primary l" id="ch3-next" onclick="kuNavigate('results')" disabled>К завершению <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+          <p class="ku-caption" id="ch3-next-hint" style="margin:0"></p>
         </div>
       </div>
     </section>
@@ -302,7 +411,7 @@
         <div class="ku-space m"></div>
         <div class="nj-video">
           <iframe title="whopper 22.05"
-            src="https://bktube.burgerkingrus.ru/videos/embed/v5RbyfKJY6zikeKmHcsTR9?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0"
+            data-src="https://bktube.burgerkingrus.ru/videos/embed/v5RbyfKJY6zikeKmHcsTR9?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0"
             allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
         </div>
         <div class="next-row" style="margin-top:var(--ku-space-l);display:flex;justify-content:center">
@@ -323,7 +432,7 @@
         <div class="ku-space m"></div>
         <div class="nj-video">
           <iframe title="ala-france"
-            src="https://bktube.burgerkingrus.ru/videos/embed/qzgPjguu4kPPS5FFhppoJR?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0"
+            data-src="https://bktube.burgerkingrus.ru/videos/embed/qzgPjguu4kPPS5FFhppoJR?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0"
             allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
         </div>
         <div class="next-row" style="margin-top:var(--ku-space-l);display:flex;justify-content:center">
@@ -344,7 +453,7 @@
         <div class="ku-space m"></div>
         <div class="nj-video">
           <iframe title="clamshell"
-            src="https://bktube.burgerkingrus.ru/videos/embed/kKWZNwA33ZFiMP3LXijCf7?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0"
+            data-src="https://bktube.burgerkingrus.ru/videos/embed/kKWZNwA33ZFiMP3LXijCf7?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0"
             allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
         </div>
         <div class="next-row" style="margin-top:var(--ku-space-l);display:flex;justify-content:center">

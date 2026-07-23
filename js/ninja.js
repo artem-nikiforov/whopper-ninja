@@ -156,7 +156,11 @@
       stage.classList.remove("drag-over");
       el.classList.remove("is-dragging");
       if (ghost) { ghost.remove(); ghost = null; }
-      if (!moved) { hideGap(); return; }
+      if (!moved) {                                   // тап (без перетаскивания)
+        hideGap();
+        if (!fromStack && asm.placed.indexOf(key) === -1) { asm.placed.push(key); render(); afterPlace(); }
+        return;
+      }
       var over = overStage(e.clientX, e.clientY);
       var idx = over ? insertIndexAt(e.clientY) : -1;
       hideGap();
@@ -225,6 +229,7 @@
       if (asm.timer) { clearInterval(asm.timer); asm.timer = null; }
       asm.running = false;
       markDone("assembly");
+      njUpdateGates();
       feedback("fb-asm", true, "<strong>Готово, и вовремя!</strong> Сборку Воппера ты знаешь.");
     } else {
       markWrong();
@@ -304,14 +309,17 @@
   }
   window.njPaperConfirm = function () {
     if (paperRot % 360 === CORRECT_ROT) {
-      feedback("fb-paper", true, "<strong>Верно!</strong> Оранжевый лого смотрит на сборщика — так и надо.");
-      setTimeout(function () {
-        document.getElementById("pack-step-1").classList.remove("active");
-        document.getElementById("pack-step-2").classList.add("active");
-      }, 700);
+      feedback("fb-paper", true, "<strong>Верно!</strong> Оранжевый лого смотрит на сборщика — так и надо. Нажми «Далее».");
+      var pc = document.getElementById("paper-confirm"), pn = document.getElementById("paper-next");
+      if (pc) pc.style.display = "none";
+      if (pn) pn.style.display = "";
     } else {
       feedback("fb-paper", false, "", "<strong>Не та сторона.</strong> Вспомни стандарт: какой стороной лист должен лежать к сборщику. Поверни лист и попробуй снова.");
     }
+  };
+  window.njPaperNext = function () {
+    document.getElementById("pack-step-1").classList.remove("active");
+    document.getElementById("pack-step-2").classList.add("active");
   };
 
   /* Шаг 2 — свайп бургера по оси Y. Цель — печатная линия сгиба «Воппер» на
@@ -355,6 +363,7 @@
       var t = document.getElementById("wrap-target");
       if (t) { t.style.top = TARGET_PCT + "%"; t.classList.add("hit"); }
       markDone("packaging");
+      njUpdateGates();
       feedback("fb-burger", true, "<strong>Готово!</strong> Нижний край Воппера лёг ровно на линию «Воппер».");
     } else {
       var dir = bottomPct > TARGET_PCT ? "выше" : "ниже";
@@ -362,97 +371,144 @@
     }
   };
 
-  /* ══ РЕЗУЛЬТАТЫ + ГЕЙТИНГ ══════════════════════════════════════════════ */
+  /* ══ РЕЗУЛЬТАТЫ ════════════════════════════════════════════════════════
+     Сюда попадаешь, только пройдя обе игры (гейт на ch3), поэтому всё
+     зачтено. Видео — по желанию (пометка один раз). */
   var VIDS = {
     whopper:   { page: "v-whopper",  title: "Сборка классического Воппера" },
     paper:     { page: "v-paper",    title: "Заворот бумаги (à la française)" },
     clamshell: { page: "v-clamshell", title: "Закрытие кламшелла" }
   };
-
-  function row(pass, title, subPass, subFail) {
-    return '<div class="nj-result-row ' + (pass ? "pass" : "fail") + '">' +
-      '<span class="nj-r-ico"><svg class="ku-ico s"><use href="#' + (pass ? "i-check-check" : "i-x") + '"/></svg></span>' +
+  function row(title, sub) {
+    return '<div class="nj-result-row pass">' +
+      '<span class="nj-r-ico"><svg class="ku-ico s"><use href="#i-check-check"/></svg></span>' +
       '<div><div class="nj-result-row__t">' + title + '</div>' +
-      '<div class="nj-result-row__s">' + (pass ? subPass : subFail) + '</div></div></div>';
+      '<div class="nj-result-row__s">' + sub + '</div></div></div>';
   }
-
-  function vidCard(key, required) {
+  function vidCard(key) {
     var v = VIDS[key], watched = isDone("vid-" + key);
-    var tag = watched ? '<span class="nj-tag done">Просмотрено</span>'
-      : (required ? '<span class="nj-tag req">Обязательно</span>' : '<span class="nj-tag opt">По желанию</span>');
-    var cls = "nj-vid-card" + (required ? " req" : "") + (watched ? " done" : "");
-    var btn = '<button class="ku-btn ' + (required && !watched ? "primary" : "soft") + ' s" onclick="kuNavigate(\'' + v.page + '\')">' +
-      '<svg class="ku-ico"><use href="#i-play"/></svg> ' + (watched ? "Пересмотреть" : "Смотреть") + '</button>';
-    return '<div class="' + cls + '"><div class="nj-vid-card__top">' +
+    return '<div class="nj-vid-card' + (watched ? " done" : "") + '"><div class="nj-vid-card__top">' +
       '<svg class="ku-ico brand"><use href="#i-play"/></svg>' +
-      '<span class="nj-vid-card__title">' + v.title + '</span>' + tag + '</div>' +
-      '<div class="nj-controls">' + btn + '</div></div>';
+      '<span class="nj-vid-card__title">' + v.title + '</span></div>' +
+      '<div class="nj-controls"><button class="ku-btn soft s" onclick="kuNavigate(\'' + v.page + '\')">' +
+      '<svg class="ku-ico"><use href="#i-play"/></svg> ' + (watched ? "Пересмотреть" : "Смотреть") + '</button></div></div>';
   }
-
   function buildResults() {
-    var rowsEl = document.getElementById("res-rows"),
-        vidsEl = document.getElementById("res-videos");
+    var rowsEl = document.getElementById("res-rows"), vidsEl = document.getElementById("res-videos");
     if (!rowsEl || !vidsEl) return;
-    var asmPass = isDone("assembly"), packPass = isDone("packaging");
-
-    rowsEl.innerHTML =
-      row(asmPass, "Сборка Воппера",
-        "Пройдено — порядок и скорость.",
-        "Не зачтено — собери Воппер на время в главе 3.") +
-      row(packPass, "Закрытие и заворот упаковки",
-        "Пройдено — сторона и позиция верны.",
-        "Не зачтено — поверни бумагу и поставь Воппер на отметку в главе 3.");
-
-    // обязательность видео зависит от провала
-    var reqWhopper = !asmPass, reqPaper = !packPass;
-    vidsEl.innerHTML =
-      vidCard("whopper", reqWhopper) +
-      vidCard("paper", reqPaper) +
-      vidCard("clamshell", false);
-
-    // гейт кнопки «Завершить»
-    var need = [];
-    if (reqWhopper) need.push("whopper");
-    if (reqPaper) need.push("paper");
-    var pending = need.filter(function (k) { return !isDone("vid-" + k); });
-
-    var btn = document.getElementById("res-complete"),
-        note = document.getElementById("res-complete-note"),
-        lead = document.getElementById("res-lead"),
-        vnote = document.getElementById("res-vid-note");
-
-    if (asmPass && packPass) {
-      lead.textContent = "Обе игры пройдены — отличная работа! Видео ниже можно посмотреть по желанию.";
-      vnote.textContent = "Все видео — по желанию: пересмотри, если хочешь освежить приёмы.";
-    } else {
-      lead.textContent = "Разбираем итог. Что не зачтено — закрой обязательным видео, затем завершай курс.";
-      vnote.textContent = "Отмеченное «Обязательно» нужно посмотреть, чтобы открыть кнопку «Завершить курс».";
-    }
-
-    if (pending.length === 0) {
-      btn.disabled = false;
-      note.textContent = (asmPass && packPass)
-        ? "Всё готово — завершай курс."
-        : "Обязательные видео просмотрены — можно завершать.";
-    } else {
-      btn.disabled = true;
-      note.textContent = "Посмотри обязательные видео выше (осталось: " + pending.length + ").";
-    }
+    rowsEl.innerHTML = row("Сборка Воппера", "Пройдено — порядок и скорость.") +
+                       row("Закрытие и заворот упаковки", "Пройдено — сторона и позиция.");
+    vidsEl.innerHTML = vidCard("whopper") + vidCard("paper") + vidCard("clamshell");
+    var lead = document.getElementById("res-lead"), vnote = document.getElementById("res-vid-note"),
+        note = document.getElementById("res-complete-note"), btn = document.getElementById("res-complete");
+    if (lead) lead.textContent = "Обе игры пройдены — отличная работа!";
+    if (vnote) vnote.textContent = "Эти видео — по желанию, для закрепления приёмов.";
+    if (note) note.textContent = "Всё готово — можно завершать курс.";
+    if (btn) btn.disabled = false;
   }
+  window.njWatched = function (key) { markDone("vid-" + key); kuNavigate("results"); };
 
-  window.njWatched = function (key) {
-    markDone("vid-" + key);
-    kuNavigate("results");
-    buildResults();
+  /* ══ ТЕСТ ПО СОУСУ (сабмит, не блокирующий) ════════════════════════════ */
+  document.addEventListener("click", function (e) {     // одиночный выбор варианта
+    var c = e.target.closest(".nj-choice");
+    if (!c) return;
+    var q = c.closest(".nj-q"); if (!q) return;
+    q.querySelectorAll(".nj-choice").forEach(function (b) { b.classList.remove("selected", "correct", "wrong"); });
+    c.classList.add("selected");
+  });
+  window.njSauceCheck = function () {
+    var ex = document.getElementById("sauce-test"); if (!ex) return;
+    var qs = ex.querySelectorAll(".nj-q"), answered = true, correct = 0, total = qs.length;
+    qs.forEach(function (q) {
+      if (q.getAttribute("data-q") === "3") {           // сопоставление
+        var sels = q.querySelectorAll(".nj-match__sel"), allSel = true, allRight = true;
+        sels.forEach(function (s) {
+          s.classList.remove("nj-ok", "nj-bad");
+          if (!s.value) { allSel = false; return; }
+          var good = s.value === s.getAttribute("data-correct");
+          s.classList.add(good ? "nj-ok" : "nj-bad");
+          if (!good) allRight = false;
+        });
+        if (!allSel) answered = false; else if (allRight) correct++;
+      } else {                                          // одиночный выбор
+        var sel = q.querySelector(".nj-choice.selected");
+        if (!sel) { answered = false; return; }
+        q.querySelectorAll(".nj-choice").forEach(function (b) { b.classList.remove("correct", "wrong"); });
+        var ok = sel.getAttribute("data-correct") === "1";
+        sel.classList.add(ok ? "correct" : "wrong");
+        if (!ok) { var right = q.querySelector('.nj-choice[data-correct="1"]'); if (right) right.classList.add("correct"); }
+        if (ok) correct++;
+      }
+    });
+    if (!answered) { feedback("fb-sauce", false, "", "<strong>Ответь на все вопросы.</strong> Выбери вариант в каждом задании."); return; }
+    var all = correct === total, fb = document.getElementById("fb-sauce");
+    fb.className = "ku-feedback show " + (all ? "correct" : "incorrect");
+    fb.innerHTML = '<span class="ku-fb-msg">' + (all
+      ? "<strong>Отлично!</strong> Все ответы верны."
+      : "<strong>Верно " + correct + " из " + total + ".</strong> Посмотри разбор ниже.") + "</span>";
+    var rec = document.getElementById("sauce-rec"); if (rec) rec.hidden = all;
+    var after = document.getElementById("sauce-after"); if (after) { after.hidden = false; after.scrollIntoView({ behavior: "smooth", block: "nearest" }); }
+    markDone("sauce-test");                              // зачёт по факту прохождения
+    njUpdateGates();
   };
 
-  /* Пересобирать результаты при каждом заходе на экран results. */
+  /* ══ НАВИГАЦИЯ · ГЕЙТИНГ · ВИДЕО ═══════════════════════════════════════ */
+  var navHist = [];
+
+  function currentPageId() {
+    var a = document.querySelector(".ku-page.active");
+    return a ? a.id.replace("ku-page-", "") : null;
+  }
+  // Последовательное прохождение (по факту, не по результату):
+  //  ch2 открыт после просмотра ch1; ch3 — после прохождения теста по соусу.
+  window.njGoChapter = function (id) {
+    if (id === "ch2" && !isDone("ch1-seen")) return;
+    if (id === "ch3" && !isDone("sauce-test")) return;
+    kuNavigate(id);
+  };
+  function njUpdateGates() {
+    var c2 = document.getElementById("ku-home-card-2"), c3 = document.getElementById("ku-home-card-3");
+    if (c2) c2.classList.toggle("locked", !isDone("ch1-seen"));
+    if (c3) c3.classList.toggle("locked", !isDone("sauce-test"));
+    var nx = document.getElementById("ch3-next");
+    if (nx) {
+      var ready = isDone("assembly") && isDone("packaging");
+      nx.disabled = !ready;
+      var hint = document.getElementById("ch3-next-hint");
+      if (hint) hint.textContent = ready ? "" : "Пройди обе игры, чтобы продолжить.";
+    }
+  }
+  function njManageVideos() {                            // грузим видео активной страницы, гасим остальные (R16)
+    document.querySelectorAll(".ku-page").forEach(function (pg) {
+      var active = pg.classList.contains("active");
+      pg.querySelectorAll("iframe[data-src]").forEach(function (f) {
+        if (active) { if (!f.getAttribute("src")) f.setAttribute("src", f.getAttribute("data-src")); }
+        else if (f.getAttribute("src")) f.removeAttribute("src");
+      });
+    });
+  }
+  function afterNav(id) {
+    if (id === "ch1") markDone("ch1-seen");
+    njManageVideos();
+    njUpdateGates();
+    if (id === "results") buildResults();
+    var bk = document.getElementById("nj-back");
+    if (bk) bk.hidden = (id === "home" || !id);
+  }
   function wrapNavigate() {
     if (typeof window.kuNavigate !== "function") return;
     var orig = window.kuNavigate;
     window.kuNavigate = function (id) {
+      var cur = currentPageId();
+      if (cur && cur !== id) navHist.push(cur);
       orig(id);
-      if (id === "results") buildResults();
+      afterNav(id);
+    };
+    window.njBack = function () {
+      if (!navHist.length) return;
+      var prev = navHist.pop();
+      orig(prev);
+      afterNav(prev);
     };
   }
 
@@ -464,10 +520,12 @@
     initPaper();
     initBurger();
     wrapNavigate();
+    njManageVideos();
+    njUpdateGates();
     buildResults();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
-  // при восстановлении прогресса из LMS/localStorage — обновить результаты
-  document.addEventListener("ku:ready", buildResults);
+  // после ku:ready DS сам зовёт applyLocks — откладываем свой апдейт, чтобы наши замки были последними
+  document.addEventListener("ku:ready", function () { setTimeout(function () { njUpdateGates(); buildResults(); }, 0); });
 })();
