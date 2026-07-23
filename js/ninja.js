@@ -50,7 +50,15 @@
     for (var i = 0; i < n; i++) s += '<circle cx="' + (2 + step * (i + 1)) + '" cy="9" r="' + (n > 2 ? 2.4 : 4) + '" fill="' + c + '"/>';
     return s + '</svg>';
   }
-  function spiral() { return '<svg class="nj-gly nj-gly--sauce" viewBox="0 0 30 18"><rect x="2" y="3" width="26" height="12" rx="6" fill="#efe6cf"/><path d="M15 9 m-5 0 a5 5 0 1 1 5 5 a3.2 3.2 0 1 1-3.2-3.2 a1.6 1.6 0 1 1 1.6 1.6" fill="none" stroke="#12100e" stroke-width="1.7"/></svg>'; }
+  function spiralPath(cx, cy, maxR, turns, pts) {
+    var d = "", tot = turns * 2 * Math.PI;
+    for (var i = 0; i <= pts; i++) {
+      var t = i / pts, ang = t * tot, r = maxR * t;
+      d += (i ? "L" : "M") + (cx + r * Math.cos(ang)).toFixed(2) + " " + (cy + r * Math.sin(ang)).toFixed(2) + " ";
+    }
+    return d.trim();
+  }
+  function spiral() { return '<svg class="nj-gly nj-gly--sauce" viewBox="0 0 30 18"><rect x="2" y="3" width="26" height="12" rx="6" fill="#efe6cf"/><path d="' + spiralPath(15, 9, 5, 3, 140) + '" fill="none" stroke="#12100e" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
   function slab(c) { return '<svg class="nj-gly" viewBox="0 0 30 18"><rect x="2" y="4" width="26" height="10" rx="5" fill="' + c + '"/></svg>'; }
 
   /* ══ ИГРА 1 — СОБЕРИ ВОППЕР ════════════════════════════════════════════
