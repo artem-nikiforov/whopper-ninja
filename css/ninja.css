@@ -215,21 +215,18 @@
   user-select: none;
 }
 .nj-wrap-paper { width: 100%; display: block; }
-.nj-target-line {
-  position: absolute; left: 6%; right: 6%; height: 0;
-  border-top: 2.5px dashed var(--ku-brand);
+/* Невидимая цель: только позиция. Подсвечивается лишь ПОСЛЕ верного ответа
+   (.hit), чтобы задание не показывало правильную линию заранее. */
+.nj-target-hit {
+  position: absolute; left: 6%; right: 6%; top: 31%; height: 0;
+  border-top: 2.5px dashed transparent;
   pointer-events: none;
+  transition: border-color var(--ku-dur-base) var(--ku-ease);
 }
-.nj-target-line::after {
-  content: attr(data-label);
-  position: absolute; right: 0; top: -1.3em;
-  font-size: .72rem; font-weight: 800; color: var(--ku-brand);
-  background: color-mix(in srgb, var(--ku__night-950, #100b07) 55%, transparent);
-  padding: 0 .35em; border-radius: 4px;
-}
+.nj-target-hit.hit { border-top-color: var(--ku-success); }
 .nj-burger {
   position: absolute; left: 50%; top: 80%;
-  width: 30%; transform: translate(-50%, -50%);
+  width: 25%; transform: translate(-50%, -50%);
   cursor: grab; touch-action: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45));
   transition: filter var(--ku-dur-fast) var(--ku-ease);
 }

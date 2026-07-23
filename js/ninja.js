@@ -302,12 +302,13 @@
         document.getElementById("pack-step-2").classList.add("active");
       }, 700);
     } else {
-      feedback("fb-paper", false, "", "<strong>Не та сторона.</strong> К сборщику должен смотреть <em>оранжевый</em> лого. Поворачивай лист нажатием.");
+      feedback("fb-paper", false, "", "<strong>Не та сторона.</strong> Вспомни стандарт: какой стороной лист должен лежать к сборщику. Поверни лист и попробуй снова.");
     }
   };
 
-  /* Шаг 2 — свайп бургера по оси Y к отметке «Воппер». */
-  var TARGET_PCT = 33, TOL = 7, burgerPct = 80, dragging = false;
+  /* Шаг 2 — свайп бургера по оси Y. Цель — печатная линия сгиба «Воппер» на
+     бумаге (~32% сверху). Засчитывается по НИЖНЕМУ краю Воппера на линии. */
+  var TARGET_PCT = 31, TOL = 5, burgerPct = 80, dragging = false;
 
   function initBurger() {
     var burger = document.getElementById("wrap-burger"), stg = document.getElementById("wrap-stage");
@@ -334,15 +335,22 @@
     if (b) b.style.top = pct + "%";
   }
   window.njBurgerConfirm = function () {
-    var ok = Math.abs(burgerPct - TARGET_PCT) <= TOL;
+    var stg = document.getElementById("wrap-stage"), b = document.getElementById("wrap-burger");
+    if (!stg || !b) return;
+    var sr = stg.getBoundingClientRect(), br = b.getBoundingClientRect();
+    var bottomPct = ((br.bottom - sr.top) / sr.height) * 100;   // нижний край Воппера
+    var ok = Math.abs(bottomPct - TARGET_PCT) <= TOL;
     if (ok) {
-      var b = document.getElementById("wrap-burger");
-      if (b) { b.classList.add("snapped"); b.style.top = TARGET_PCT + "%"; }
+      var halfH = (br.height / 2) / sr.height * 100;
+      setBurger(TARGET_PCT - halfH);                            // нижний край ровно на линию
+      b.classList.add("snapped");
+      var t = document.getElementById("wrap-target");
+      if (t) { t.style.top = TARGET_PCT + "%"; t.classList.add("hit"); }
       markDone("packaging");
-      feedback("fb-burger", true, "<strong>Точно на отметке «Воппер»!</strong> Упаковку ты закрыл верно.");
+      feedback("fb-burger", true, "<strong>Готово!</strong> Нижний край Воппера лёг ровно на линию сгиба «Воппер».");
     } else {
-      var dir = burgerPct > TARGET_PCT ? "выше" : "ниже";
-      feedback("fb-burger", false, "", "<strong>Мимо отметки.</strong> Подвинь Воппер чуть " + dir + " — точно на пунктирную линию «Воппер».");
+      var dir = bottomPct > TARGET_PCT ? "выше" : "ниже";
+      feedback("fb-burger", false, "", "<strong>Пока мимо.</strong> Смотри на бумагу: нижний край Воппера должен лечь на нужную линию сгиба. Сдвинь чуть " + dir + ".");
     }
   };
 
