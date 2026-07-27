@@ -26,10 +26,11 @@
     { key: "mayo",    idx: 1, label: "Майонез ×2",       gly: dots("#f4ead2", 2) },
     { key: "lettuce", idx: 2, label: "Салат айсберг",    gly: ruffle("#6ab04c") },
     { key: "tomato",  idx: 3, label: "Томат ×2",          gly: circles("#d84a3a", 2) },
-    { key: "sauce",   idx: 4, label: "Соус Ниндзя",       gly: spiral() },
-    { key: "pickles", idx: 5, label: "Огурцы ×4",         gly: circles("#8bbf3f", 4) },
-    { key: "patty",   idx: 6, label: "Котлета",           gly: slab("#7a3b1e") },
-    { key: "heel",    idx: 7, label: "Нижняя булочка",    gly: bun(false) }
+    { key: "onion",   idx: 4, label: "Лук (щепотка)",     gly: onion() },
+    { key: "sauce",   idx: 5, label: "Соус Ниндзя",       gly: spiral() },
+    { key: "pickles", idx: 6, label: "Огурцы ×4",         gly: circles("#8bbf3f", 4) },
+    { key: "patty",   idx: 7, label: "Котлета",           gly: slab("#7a3b1e") },
+    { key: "heel",    idx: 8, label: "Нижняя булочка",    gly: bun(false) }
   ];
   var CORRECT = ING.map(function (i) { return i.idx; }); // [0..7]
   var byKey = {}; ING.forEach(function (i) { byKey[i.key] = i; });
@@ -60,6 +61,16 @@
   }
   function spiral() { return '<svg class="nj-gly nj-gly--sauce" viewBox="0 0 30 18"><rect x="2" y="3" width="26" height="12" rx="6" fill="#efe6cf"/><path d="' + spiralPath(15, 9, 5, 3, 140) + '" fill="none" stroke="#12100e" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
   function slab(c) { return '<svg class="nj-gly" viewBox="0 0 30 18"><rect x="2" y="4" width="26" height="10" rx="5" fill="' + c + '"/></svg>'; }
+  /* Щепотка рубленого лука: несколько светлых кусочков вразброс */
+  function onion() {
+    var bits = [[6,7,2.6,1.7,-18],[11,11,2.2,1.5,22],[15,6.5,2.4,1.6,10],[19,10.5,2.1,1.4,-25],[24,7.5,2.5,1.6,14]];
+    var s = '<svg class="nj-gly" viewBox="0 0 30 18">';
+    bits.forEach(function (b) {
+      s += '<ellipse cx="' + b[0] + '" cy="' + b[1] + '" rx="' + b[2] + '" ry="' + b[3] +
+           '" transform="rotate(' + b[4] + ' ' + b[0] + ' ' + b[1] + ')" fill="#f6f1f7" stroke="#c9bcd2" stroke-width=".7"/>';
+    });
+    return s + '</svg>';
+  }
 
   /* ══ ИГРА 1 — СОБЕРИ ВОППЕР ════════════════════════════════════════════
      asm.placed — ключи в порядке стопки (index 0 — верхний слой, последний —
@@ -213,13 +224,13 @@
     var ok = full && (eqArr(arr, CORRECT) || eqArr(arr, rev));
 
     if (asm.round === 1) {
-      if (!full) { feedback("fb-asm", false, "", "<strong>Пока не всё.</strong> Поставь на платформу все 8 ингредиентов."); return; }
+      if (!full) { feedback("fb-asm", false, "", "<strong>Пока не всё.</strong> Поставь на платформу все " + ING.length + " ингредиентов."); return; }
       if (ok) {
-        feedback("fb-asm", true, "<strong>Верный порядок!</strong> Теперь собери то же самое на время.");
+        feedback("fb-asm", true, "<strong>Верный порядок!</strong> Лук кладём щепоткой в 4 пальца. Теперь собери то же самое на время.");
         goRound2();
       } else {
         markWrong();
-        feedback("fb-asm", false, "", "<strong>Порядок сбит.</strong> Соус — сразу после томата, огурцы — перед котлетой, булочки — по краям. Поправь и проверь снова.");
+        feedback("fb-asm", false, "", "<strong>Порядок сбит.</strong> Лук — между томатом и соусом, огурцы — перед котлетой, булочки — по краям. Поправь и проверь снова.");
       }
       return;
     }
@@ -262,7 +273,7 @@
     // не сбрасываем платформу сразу — даём нажать «Старт»
   }
   function resetTimerBadge() {
-    asm.timeLeft = 40;
+    asm.timeLeft = 45;            // 9 слоёв: чуть больше времени, чем было на 8
     var t = document.getElementById("asm-timer");
     if (t) { t.classList.remove("solid"); t.innerHTML = '<svg class="ku-ico s"><use href="#i-clock"/></svg> 0:' + pad(asm.timeLeft); }
   }
