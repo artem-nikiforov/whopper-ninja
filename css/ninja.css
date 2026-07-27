@@ -339,6 +339,9 @@
   transform: rotate(180deg);
   cursor: grab; touch-action: none;
   box-shadow: 0 6px 16px rgba(0, 0, 0, .45);
+  /* бумага полупрозрачная: сквозь клапан чуть просматривается Воппер —
+     видно, что лого встало по центру */
+  opacity: .9;
   /* из-за rotate(180°) border-top рисуется снизу — это и есть линия сгиба */
   border-top: 1px solid color-mix(in srgb, var(--ku__night-950, #100b07) 22%, transparent);
 }
