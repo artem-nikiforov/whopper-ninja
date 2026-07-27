@@ -627,6 +627,11 @@
     initBurger();
     initFold();
     syncPaperVar();
+    // страховка: внутри игр нативный drag браузера не нужен нигде
+    ["asm", "pack"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("dragstart", function (e) { e.preventDefault(); });
+    });
     wrapNavigate();
     njManageVideos();
     njUpdateGates();

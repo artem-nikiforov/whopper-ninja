@@ -293,6 +293,14 @@
   border-radius: var(--ku-radius-l);
   clip-path: inset(0 0 var(--nj-cut, 0%) 0);
   transform: scaleX(-1);
+  pointer-events: none;      /* лист — только фон: промах мимо Воппера ничего не тянет */
+}
+/* Картинки-ассеты не должны уезжать нативным drag'ом браузера
+   (иначе за курсором тащится призрак PNG). */
+.nj-paper, .nj-wrap-paper, .nj-burger {
+  -webkit-user-drag: none;
+  user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 /* Невидимая цель: только позиция. Подсвечивается лишь ПОСЛЕ верного ответа
    (.hit), чтобы задание не показывало правильную линию заранее. */
