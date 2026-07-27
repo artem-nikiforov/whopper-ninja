@@ -46,9 +46,21 @@
 }
 .nj-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 
-/* ── Кнопка «Назад» в шапке ─────────────────────────────────────────────── */
-.nj-back { margin-inline-end: .6rem; flex: 0 0 auto; }
-@media (max-width: 520px) { .nj-back { padding-inline: .6rem; } }
+/* ── Шапка: кнопка «Назад» + длинное название ────────────────────────────
+   «Воппер Чёрный Ниндзя» в одну строку не влезает на узких экранах, поэтому
+   там прячем подпись кнопки и слегка уменьшаем название (с ellipsis как
+   страховкой), чтобы шапка оставалась одной строкой. */
+.nj-back { margin-inline-end: .4rem; flex: 0 0 auto; }
+.ku-topbar__brand {
+  white-space: nowrap; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis;
+}
+@media (max-width: 560px) {
+  .nj-back { padding-inline: .5rem; }
+  .nj-back__t { display: none; }
+  .ku-topbar__brand { font-size: .92rem; }
+}
+@media (max-width: 400px) { .ku-topbar__brand { font-size: .84rem; } }
 
 /* ══ ТЕСТ ПО СОУСУ ══════════════════════════════════════════════════════ */
 .nj-q { margin-bottom: var(--ku-space-m); }
