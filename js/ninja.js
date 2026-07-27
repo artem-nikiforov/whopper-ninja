@@ -398,10 +398,13 @@
     if (stg && sr && sr.height) stg.style.setProperty("--nj-paper-h", sr.height + "px");
   }
   function applyFold() {
-    var f = document.getElementById("wrap-flap"), g = document.getElementById("wrap-grip");
+    var f = document.getElementById("wrap-flap"), g = document.getElementById("wrap-grip"),
+        p = document.getElementById("wrap-paper");
     var lead = 2 * foldC - 100;                    // ведущий (бывший нижний) край листа
     if (f) { f.style.top = lead + "%"; f.style.height = (100 - foldC) + "%"; }
     if (g) g.style.top = lead + "%";
+    // завёрнутая часть уходит с плоскости листа — подрезаем его по линии сгиба
+    if (p) p.style.setProperty("--nj-cut", (100 - foldC) + "%");
   }
   function logoPct() { return 2 * foldC - LOGO_PCT; }
   function burgerCenterPct() { return burgerBottomPct() - burgerHalfPct(); }

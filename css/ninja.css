@@ -264,12 +264,17 @@
 }
 .nj-wrap-stage {
   position: relative; width: 100%;
-  border-radius: var(--ku-radius-l);
-  border: 1px solid var(--ku-border-soft);
   touch-action: none;
   user-select: none;
 }
-.nj-wrap-paper { width: 100%; display: block; border-radius: inherit; }
+/* Рамка живёт на самом листе (не на сцене): при заворотe лист подрезается
+   снизу по линии сгиба, и «лишний» кусок исчезает вместе с рамкой. */
+.nj-wrap-paper {
+  width: 100%; display: block;
+  border: 1px solid var(--ku-border-soft);
+  border-radius: var(--ku-radius-l);
+  clip-path: inset(0 0 var(--nj-cut, 0%) 0);
+}
 /* Невидимая цель: только позиция. Подсвечивается лишь ПОСЛЕ верного ответа
    (.hit), чтобы задание не показывало правильную линию заранее. */
 .nj-target-hit {
@@ -304,10 +309,14 @@
   transform: rotate(180deg);
   cursor: grab; touch-action: none;
   box-shadow: 0 6px 16px rgba(0, 0, 0, .45);
+  /* из-за rotate(180°) border-top рисуется снизу — это и есть линия сгиба */
+  border-top: 1px solid color-mix(in srgb, var(--ku__night-950, #100b07) 22%, transparent);
 }
 .nj-flap:active { cursor: grabbing; }
+/* Плашка сидит НАД ведущим краем (translate -100%), иначе на старте
+   (край = низ листа) её половина уезжает за пределы обёртки и не видна. */
 .nj-flap-grip {
-  position: absolute; left: 50%; translate: -50% -50%; z-index: 4;
+  position: absolute; left: 50%; translate: -50% -100%; z-index: 4;
   display: inline-flex; align-items: center; gap: .4rem;
   padding: .3rem .7rem; border-radius: var(--ku-radius-pill);
   background: var(--ku-brand); color: var(--ku-brand-on);
