@@ -253,40 +253,78 @@
   display: flex; flex-direction: column; align-items: center; pointer-events: none;
 }
 
-/* Свайп бургера по бумаге */
+/* Свайп бургера по бумаге.
+   Воппер крупный: нижний край ложится на линию «Воппер» (32.07% высоты листа),
+   верхняя треть при этом выходит за верхний край бумаги — поэтому обёртке
+   нужен запас сверху, а сцена не обрезает содержимое. */
+.nj-wrap-outer {
+  width: 100%; max-width: 30rem; margin-inline: auto;
+  padding-top: 16%;              /* запас под свес Воппера (в % ширины) */
+  overflow: hidden;
+}
 .nj-wrap-stage {
-  position: relative; width: 100%; max-width: 30rem; margin-inline: auto;
-  border-radius: var(--ku-radius-l); overflow: hidden;
+  position: relative; width: 100%;
+  border-radius: var(--ku-radius-l);
   border: 1px solid var(--ku-border-soft);
   touch-action: none;
   user-select: none;
 }
-.nj-wrap-paper { width: 100%; display: block; }
+.nj-wrap-paper { width: 100%; display: block; border-radius: inherit; }
 /* Невидимая цель: только позиция. Подсвечивается лишь ПОСЛЕ верного ответа
    (.hit), чтобы задание не показывало правильную линию заранее. */
 .nj-target-hit {
-  position: absolute; left: 6%; right: 6%; top: 31%; height: 0;
+  position: absolute; left: 6%; right: 6%; top: 32.07%; height: 0;
   border-top: 2.5px dashed transparent;
   pointer-events: none;
   transition: border-color var(--ku-dur-base) var(--ku-ease);
 }
 .nj-target-hit.hit { border-top-color: var(--ku-success); }
 .nj-burger {
-  position: absolute; left: 50%; top: 80%;
-  width: 25%; transform: translate(-50%, -50%);
-  cursor: grab; touch-action: none; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45));
+  position: absolute; left: 50%; top: 60%;
+  width: 32%; transform: translate(-50%, -50%);
+  z-index: 2;
+  cursor: grab; touch-action: none; filter: drop-shadow(0 6px 12px rgba(0,0,0,.45));
   transition: filter var(--ku-dur-fast) var(--ku-ease);
 }
 .nj-burger:active { cursor: grabbing; }
-.nj-burger.snapped { filter: drop-shadow(0 0 0 transparent) drop-shadow(0 6px 10px rgba(0,0,0,.45)); }
-.nj-hint-drag {
-  position: absolute; left: 50%; bottom: .6rem; transform: translateX(-50%);
-  color: var(--ku-text); font-size: .78rem; font-weight: 600;
-  background: color-mix(in srgb, var(--ku__night-950, #100b07) 65%, transparent);
-  padding: .3rem .7rem; border-radius: var(--ku-radius-pill);
-  border: 1px solid var(--ku-border); pointer-events: none;
-  display: inline-flex; align-items: center; gap: .4rem;
+.nj-burger.snapped { cursor: default; }
+
+/* ── Заворот: нижний край листа, сложенный на Воппер ──────────────────────
+   Клапан = зеркальная копия нижней части листа. Сгиб по линии C: клапан
+   занимает [2C−100 … C], поэтому печатная сторона (с оранжевым лого)
+   оказывается сверху и накрывает бургер. */
+.nj-flap {
+  position: absolute; left: 0; right: 0; z-index: 3;
+  background-image: url("../assets/paper.png");
+  background-size: 100% var(--nj-paper-h, 100%);
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  /* rotate(180°) = та же вертикальная геометрия, что и зеркало, но лого
+     (напечатанное на листе перевёрнутым — как раз под заворот) читается прямо */
+  transform: rotate(180deg);
+  cursor: grab; touch-action: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .45);
 }
+.nj-flap:active { cursor: grabbing; }
+.nj-flap-grip {
+  position: absolute; left: 50%; translate: -50% -50%; z-index: 4;
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .3rem .7rem; border-radius: var(--ku-radius-pill);
+  background: var(--ku-brand); color: var(--ku-brand-on);
+  font-size: .76rem; font-weight: 700; white-space: nowrap;
+  cursor: grab; touch-action: none; box-shadow: var(--ku-shadow-s);
+}
+.nj-flap-grip:active { cursor: grabbing; }
+.nj-hint-drag {
+  position: absolute; left: 50%; bottom: .5rem; transform: translateX(-50%);
+  z-index: 1;                     /* под булочкой, чтобы не перекрывать её */
+  color: var(--ku-text); font-size: .74rem; font-weight: 600; white-space: nowrap;
+  background: color-mix(in srgb, var(--ku__night-950, #100b07) 78%, transparent);
+  padding: .28rem .6rem; border-radius: var(--ku-radius-pill);
+  border: 1px solid var(--ku-border); pointer-events: none;
+  display: inline-flex; align-items: center; gap: .35rem;
+}
+@media (max-width: 420px) { .nj-hint-drag { font-size: .68rem; padding: .24rem .5rem; } }
 
 /* ══ РЕЗУЛЬТАТЫ / ВИДЕО-АКТИВНОСТИ ══════════════════════════════════════ */
 .nj-result-row {

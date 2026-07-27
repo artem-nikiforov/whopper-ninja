@@ -322,15 +322,38 @@
     document.getElementById("pack-step-2").classList.add("active");
   };
 
-  /* Шаг 2 — свайп бургера по оси Y. Цель — печатная линия сгиба «Воппер» на
-     бумаге (~32% сверху). Засчитывается по НИЖНЕМУ краю Воппера на линии. */
-  var TARGET_PCT = 31, TOL = 5, burgerPct = 80, dragging = false;
+  /* Шаг 2 — свайп бургера по оси Y. Цель — печатная линия «Воппер» на бумаге
+     (32.07% высоты листа, измерено по макету). Засчитывается по НИЖНЕМУ краю
+     Воппера на линии; верхняя треть булочки при этом свисает за край листа. */
+  var TARGET_PCT = 32.07, TOL = 5, dragging = false;
+
+  function stageRect() { var s = document.getElementById("wrap-stage"); return s ? s.getBoundingClientRect() : null; }
+  function burgerHalfPct() {                       // половина высоты булочки в % высоты листа
+    var sr = stageRect(), b = document.getElementById("wrap-burger");
+    if (!sr || !b || !sr.height) return 24;
+    return (b.getBoundingClientRect().height / sr.height) * 100 / 2;
+  }
+  function burgerBottomPct() {
+    var sr = stageRect(), b = document.getElementById("wrap-burger");
+    if (!sr || !b) return 0;
+    return ((b.getBoundingClientRect().bottom - sr.top) / sr.height) * 100;
+  }
+  function setBurger(centerPct) {
+    var b = document.getElementById("wrap-burger");
+    if (b) b.style.top = centerPct + "%";
+  }
+  function clampCenter(centerPct) {                // держим Воппер в пределах листа и запаса сверху
+    var half = burgerHalfPct();
+    return Math.max(24 - half, Math.min(100 - half, centerPct));
+  }
 
   function initBurger() {
     var burger = document.getElementById("wrap-burger"), stg = document.getElementById("wrap-stage");
     if (!burger || !stg) return;
-    setBurger(80);
+    var place = function () { setBurger(clampCenter(85 - burgerHalfPct())); };  // старт: у нижнего края листа
+    if (burger.complete) place(); else burger.addEventListener("load", place);
     burger.addEventListener("pointerdown", function (e) {
+      if (burger.classList.contains("snapped")) return;
       dragging = true;
       try { burger.setPointerCapture(e.pointerId); } catch (_) {}
       e.preventDefault();
@@ -338,36 +361,105 @@
     burger.addEventListener("pointermove", function (e) {
       if (!dragging) return;
       var r = stg.getBoundingClientRect();
-      var pct = ((e.clientY - r.top) / r.height) * 100;
-      setBurger(Math.max(8, Math.min(92, pct)));
+      setBurger(clampCenter(((e.clientY - r.top) / r.height) * 100));
     });
     function end() { dragging = false; }
     burger.addEventListener("pointerup", end);
     burger.addEventListener("pointercancel", end);
   }
-  function setBurger(pct) {
-    burgerPct = pct;
-    var b = document.getElementById("wrap-burger");
-    if (b) b.style.top = pct + "%";
-  }
+
   window.njBurgerConfirm = function () {
-    var stg = document.getElementById("wrap-stage"), b = document.getElementById("wrap-burger");
-    if (!stg || !b) return;
-    var sr = stg.getBoundingClientRect(), br = b.getBoundingClientRect();
-    var bottomPct = ((br.bottom - sr.top) / sr.height) * 100;   // нижний край Воппера
-    var ok = Math.abs(bottomPct - TARGET_PCT) <= TOL;
-    if (ok) {
-      var halfH = (br.height / 2) / sr.height * 100;
-      setBurger(TARGET_PCT - halfH);                            // нижний край ровно на линию
+    var b = document.getElementById("wrap-burger");
+    if (!b) return;
+    var bottomPct = burgerBottomPct();
+    if (Math.abs(bottomPct - TARGET_PCT) <= TOL) {
+      setBurger(TARGET_PCT - burgerHalfPct());                  // нижний край ровно на линию
       b.classList.add("snapped");
       var t = document.getElementById("wrap-target");
       if (t) { t.style.top = TARGET_PCT + "%"; t.classList.add("hit"); }
-      markDone("packaging");
-      njUpdateGates();
-      feedback("fb-burger", true, "<strong>Готово!</strong> Нижний край Воппера лёг ровно на линию «Воппер».");
+      var bc = document.getElementById("burger-confirm"), bn = document.getElementById("burger-next");
+      if (bc) bc.style.display = "none";
+      if (bn) bn.style.display = "";
+      feedback("fb-burger", true, "<strong>Готово!</strong> Нижний край Воппера лёг ровно на линию «Воппер». Нажми «Далее».");
     } else {
       var dir = bottomPct > TARGET_PCT ? "выше" : "ниже";
       feedback("fb-burger", false, "", "<strong>Пока мимо.</strong> Смотри на бумагу: нижний край Воппера должен лечь на нужную линию. Сдвинь чуть " + dir + ".");
+    }
+  };
+
+  /* Шаг 3 — заворот. Бургер лежит на листе; тянем нижний край бумаги
+     (с оранжевым лого, центр — 87.67% высоты листа) вверх. Сгиб по линии C
+     переносит точку y в 2C − y, значит лого оказывается в 2C − 87.67.
+     Верно, когда лого совпало с центром Воппера. */
+  var LOGO_PCT = 87.67, FOLD_TOL = 4.5, foldC = 100, foldDrag = null;
+
+  function syncPaperVar() {
+    var stg = document.getElementById("wrap-stage"), sr = stageRect();
+    if (stg && sr && sr.height) stg.style.setProperty("--nj-paper-h", sr.height + "px");
+  }
+  function applyFold() {
+    var f = document.getElementById("wrap-flap"), g = document.getElementById("wrap-grip");
+    var lead = 2 * foldC - 100;                    // ведущий (бывший нижний) край листа
+    if (f) { f.style.top = lead + "%"; f.style.height = (100 - foldC) + "%"; }
+    if (g) g.style.top = lead + "%";
+  }
+  function logoPct() { return 2 * foldC - LOGO_PCT; }
+  function burgerCenterPct() { return burgerBottomPct() - burgerHalfPct(); }
+
+  window.njBurgerNext = function () {
+    var f = document.getElementById("wrap-flap"), g = document.getElementById("wrap-grip"),
+        h = document.getElementById("wrap-hint"), instr = document.getElementById("pack2-instr"),
+        bn = document.getElementById("burger-next"), fc = document.getElementById("fold-confirm"),
+        fb = document.getElementById("fb-burger");
+    syncPaperVar();
+    foldC = 100; applyFold();
+    if (f) f.hidden = false;
+    if (g) g.hidden = false;
+    if (h) h.hidden = true;
+    if (bn) bn.style.display = "none";
+    if (fc) fc.style.display = "";
+    if (fb) fb.className = "ku-feedback";
+    if (instr) instr.innerHTML = "Воппер на месте. Теперь заверни: тяни край бумаги с оранжевым лого вверх — он должен лечь на середину Воппера.";
+  };
+
+  function initFold() {
+    var stg = document.getElementById("wrap-stage");
+    if (!stg) return;
+    ["wrap-flap", "wrap-grip"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("pointerdown", function (e) {
+        var sr = stageRect(); if (!sr) return;
+        foldDrag = { y: e.clientY, c: foldC, h: sr.height };
+        try { el.setPointerCapture(e.pointerId); } catch (_) {}
+        e.preventDefault();
+      });
+      el.addEventListener("pointermove", function (e) {
+        if (!foldDrag) return;
+        // тянем ведущий край: сдвиг края на d означает изменение сгиба на d/2
+        var d = ((e.clientY - foldDrag.y) / foldDrag.h) * 100;
+        foldC = Math.max(40, Math.min(100, foldDrag.c + d / 2));
+        applyFold();
+      });
+      function end() { foldDrag = null; }
+      el.addEventListener("pointerup", end);
+      el.addEventListener("pointercancel", end);
+    });
+    window.addEventListener("resize", function () { syncPaperVar(); });
+  }
+
+  window.njFoldConfirm = function () {
+    var diff = logoPct() - burgerCenterPct();
+    if (Math.abs(diff) <= FOLD_TOL) {
+      foldC = (burgerCenterPct() + LOGO_PCT) / 2;   // доводим точно на середину
+      applyFold();
+      var g = document.getElementById("wrap-grip"); if (g) g.hidden = true;
+      var fc = document.getElementById("fold-confirm"); if (fc) fc.style.display = "none";
+      markDone("packaging");
+      njUpdateGates();
+      feedback("fb-burger", true, "<strong>Отлично!</strong> Край с оранжевым лого лёг на середину Воппера — сэндвич завёрнут по стандарту.");
+    } else {
+      feedback("fb-burger", false, "", "<strong>Пока не то.</strong> Оранжевое лого должно оказаться ровно посередине Воппера. Подтяни край " + (diff > 0 ? "выше" : "ниже") + ".");
     }
   };
 
@@ -519,6 +611,8 @@
     if (pool) { initPoolOrder(); renderPool(); }
     initPaper();
     initBurger();
+    initFold();
+    syncPaperVar();
     wrapNavigate();
     njManageVideos();
     njUpdateGates();
