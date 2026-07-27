@@ -243,12 +243,16 @@
   border: 1px solid var(--ku-border-soft);
   overflow: hidden;
 }
+/* Лист лежит ОБРАТНОЙ стороной вверх и просвечивает, поэтому печать видна
+   зеркально по горизонтали (scaleX(-1)) — как на реальной станции сборки.
+   Зеркало не меняет верх/низ, так что «оранжевое лого к сборщику» остаётся
+   тем же верным положением. */
 .nj-paper {
   width: 86%; height: auto; display: block; cursor: pointer;
   border-radius: 6px;
   box-shadow: var(--ku-shadow-m);
   transition: transform var(--ku-dur-slow) var(--ku-ease-spring);
-  transform: rotate(var(--nj-rot, 0deg));
+  transform: rotate(var(--nj-rot, 0deg)) scaleX(-1);
 }
 .nj-paper:focus-visible { outline: 3px solid var(--ku-brand); outline-offset: 3px; }
 .nj-paper-badge {
@@ -280,12 +284,15 @@
   user-select: none;
 }
 /* Рамка живёт на самом листе (не на сцене): при заворотe лист подрезается
-   снизу по линии сгиба, и «лишний» кусок исчезает вместе с рамкой. */
+   снизу по линии сгиба, и «лишний» кусок исчезает вместе с рамкой.
+   scaleX(-1) — лист лежит обратной стороной вверх, печать просвечивает
+   зеркально (клапан при заворотe перевернётся печатью вверх, см. .nj-flap). */
 .nj-wrap-paper {
   width: 100%; display: block;
   border: 1px solid var(--ku-border-soft);
   border-radius: var(--ku-radius-l);
   clip-path: inset(0 0 var(--nj-cut, 0%) 0);
+  transform: scaleX(-1);
 }
 /* Невидимая цель: только позиция. Подсвечивается лишь ПОСЛЕ верного ответа
    (.hit), чтобы задание не показывало правильную линию заранее. */
@@ -316,8 +323,11 @@
   background-size: 100% var(--nj-paper-h, 100%);
   background-position: center bottom;
   background-repeat: no-repeat;
-  /* rotate(180°) = та же вертикальная геометрия, что и зеркало, но лого
-     (напечатанное на листе перевёрнутым — как раз под заворот) читается прямо */
+  /* Физика заворота: лист лежит печатью вниз (база — scaleX(-1)). Сгиб
+     переворачивает клапан вокруг горизонтальной оси, т.е. добавляет
+     scaleY(-1): scaleY(-1)·scaleX(-1) = rotate(180°). Печать оказывается
+     сверху и читается ПРАВИЛЬНОЙ стороной, а нижнее лого (напечатанное
+     на листе вверх ногами как раз под заворот) встаёт прямо. */
   transform: rotate(180deg);
   cursor: grab; touch-action: none;
   box-shadow: 0 6px 16px rgba(0, 0, 0, .45);
