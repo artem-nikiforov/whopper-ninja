@@ -127,6 +127,13 @@
   border-style: solid;
   background: color-mix(in srgb, var(--ku-brand) 12%, transparent);
 }
+/* Сборка верна: панель зеленеет — сразу видно, что задание закрыто
+   и таймер остановлен (ОС ниже можно и не заметить). */
+.nj-stage.solved {
+  border-color: var(--ku-success);
+  border-style: solid;
+  background: color-mix(in srgb, var(--ku-success) 14%, transparent);
+}
 .nj-stage__hint {
   position: absolute; inset: 0; margin: auto; height: max-content; width: max-content;
   color: var(--ku-text-muted); font-size: var(--ku-fs-small, .9rem); text-align: center;
@@ -150,7 +157,13 @@
 .nj-layer:hover { border-color: var(--ku-brand); }
 .nj-layer:active { cursor: grabbing; }
 .nj-layer.is-dragging { opacity: .35; }
-.nj-layer.wrong { border-color: var(--ku-danger); background: var(--ku-danger-soft); }
+/* Слой не на своём месте — красный (подсвечиваются сразу все такие) */
+.nj-layer.wrong {
+  border-color: var(--ku-danger);
+  background: var(--ku-danger-soft);
+  color: var(--ku-text);
+}
+.nj-stage.solved .nj-layer { border-color: color-mix(in srgb, var(--ku-success) 45%, transparent); }
 .nj-layer .nj-gly { flex: 0 0 auto; }
 .nj-layer__rm {
   margin-inline-start: auto; color: var(--ku-text-muted);
@@ -213,6 +226,23 @@
 
 /* Ряд управления игрой */
 .nj-controls { display: flex; flex-wrap: wrap; gap: var(--ku-space-2xs); align-items: center; }
+
+/* Таймер остановлен (сборка засчитана) */
+.ku-badge.done {
+  background: var(--ku-success); color: #fff; border-color: transparent;
+}
+
+/* Замок на втором тренажёре, пока не пройден первый */
+.nj-lock-note {
+  display: flex; align-items: center; gap: .8rem;
+  padding: var(--ku-space-s);
+  border-radius: var(--ku-radius-l);
+  border: 1.5px dashed var(--ku-border);
+  background: var(--ku-surface);
+  color: var(--ku-text-muted);
+}
+.nj-lock-note .ku-ico { flex: 0 0 auto; color: var(--ku-text-muted); }
+.nj-lock-note__t { font-weight: 700; color: var(--ku-text); }
 
 /* Полоски раунда */
 .nj-rounds { display: flex; gap: .5rem; }

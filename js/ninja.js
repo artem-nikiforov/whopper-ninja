@@ -212,7 +212,7 @@
   window.njAsmReset = function () {
     if (asm.timer) { clearInterval(asm.timer); asm.timer = null; }
     asm.running = false;
-    initPoolOrder(); clearAll();
+    initPoolOrder(); clearAll(); markSolved(false);
     var fb = document.getElementById("fb-asm"); if (fb) fb.className = "ku-feedback";
     if (asm.round === 2) resetTimerBadge();
   };
@@ -223,14 +223,22 @@
     var rev = CORRECT.slice().reverse();
     var ok = full && (eqArr(arr, CORRECT) || eqArr(arr, rev));
 
+    // Разбор порядка — один и тот же для обоих раундов
+    var RECIPE = "Новый соус — между луком и солёными огурцами, лук — сразу после томатов, " +
+                 "котлета — сразу на нижнюю булочку, под верхней булочкой — майонез, салат и томаты. " +
+                 "Стандартный рецепт Воппера, но с добавлением нового соуса.";
+    var WRONG_HINT = "<strong>Красным выделены ингредиенты, которые стоят не на своих местах.</strong><br>" + RECIPE;
+
     if (asm.round === 1) {
       if (!full) { feedback("fb-asm", false, "", "<strong>Пока не всё.</strong> Поставь на платформу все " + ING.length + " ингредиентов."); return; }
       if (ok) {
+        markSolved(true);
         feedback("fb-asm", true, "<strong>Верный порядок!</strong> Лук кладём щепоткой в 4 пальца. Теперь собери то же самое на время.");
         goRound2();
       } else {
+        markSolved(false);
         markWrong();
-        feedback("fb-asm", false, "", "<strong>Порядок сбит.</strong> Лук — между томатом и соусом, огурцы — перед котлетой, булочки — по краям. Поправь и проверь снова.");
+        feedback("fb-asm", false, "", WRONG_HINT);
       }
       return;
     }
@@ -239,24 +247,39 @@
     if (ok) {
       if (asm.timer) { clearInterval(asm.timer); asm.timer = null; }
       asm.running = false;
+      markSolved(true);
+      stopTimerBadge();
       markDone("assembly");
       njUpdateGates();
       feedback("fb-asm", true, "<strong>Готово, и вовремя!</strong> Сборку Воппера ты знаешь.");
     } else {
+      markSolved(false);
       markWrong();
-      feedback("fb-asm", false, "", "<strong>Почти!</strong> Порядок неверный — поправь слои местами, пока идёт время.");
+      feedback("fb-asm", false, "", WRONG_HINT);
     }
   };
 
+  /* Подсвечиваем КРАСНЫМ все слои, стоящие не на своих местах (в обоих раундах).
+     Эталон выбираем тот, к которому сборка ближе, — порядок засчитывается
+     в обе стороны. */
   function markWrong() {
     var arr = asm.placed.map(function (k) { return byKey[k].idx; });
     var rev = CORRECT.slice().reverse();
     var target = missCount(arr, rev) < missCount(arr, CORRECT) ? rev : CORRECT;
-    var bad = -1;
-    for (var i = 0; i < arr.length; i++) { if (arr[i] !== target[i]) { bad = i; break; } }
-    if (bad === -1) return;
-    var layer = stage.querySelectorAll(".nj-layer")[bad];
-    if (layer) { layer.classList.add("wrong", "ku-shake"); setTimeout(function () { layer.classList.remove("ku-shake"); }, 500); }
+    var layers = stage.querySelectorAll(".nj-layer");
+    layers.forEach(function (l, i) {
+      var bad = arr[i] !== target[i];
+      l.classList.toggle("wrong", bad);
+      if (bad) {
+        l.classList.add("ku-shake");
+        setTimeout(function () { l.classList.remove("ku-shake"); }, 500);
+      }
+    });
+  }
+  function markSolved(on) {
+    if (!stage) return;
+    stage.classList.toggle("solved", !!on);
+    if (on) stage.querySelectorAll(".nj-layer").forEach(function (l) { l.classList.remove("wrong"); });
   }
 
   function goRound2() {
@@ -275,12 +298,20 @@
   function resetTimerBadge() {
     asm.timeLeft = 45;            // 9 слоёв: чуть больше времени, чем было на 8
     var t = document.getElementById("asm-timer");
-    if (t) { t.classList.remove("solid"); t.innerHTML = '<svg class="ku-ico s"><use href="#i-clock"/></svg> 0:' + pad(asm.timeLeft); }
+    if (t) { t.classList.remove("solid", "done"); t.innerHTML = '<svg class="ku-ico s"><use href="#i-clock"/></svg> 0:' + pad(asm.timeLeft); }
+  }
+  /* Таймер остановлен: видно, что задание закрыто, и за сколько собрал. */
+  function stopTimerBadge() {
+    var t = document.getElementById("asm-timer");
+    if (!t) return;
+    t.classList.remove("solid");
+    t.classList.add("done");
+    t.innerHTML = '<svg class="ku-ico s"><use href="#i-check"/></svg> Готово за 0:' + pad(Math.max(0, 45 - asm.timeLeft));
   }
   function pad(n) { return String(n).padStart(2, "0"); }
 
   window.njAsmStart = function () {
-    initPoolOrder(); clearAll();
+    initPoolOrder(); clearAll(); markSolved(false);
     var fb = document.getElementById("fb-asm"); if (fb) fb.className = "ku-feedback";
     resetTimerBadge();
     asm.running = true;
@@ -485,11 +516,11 @@
     paper:     { page: "v-paper",    title: "Заворот бумаги (à la française)" },
     clamshell: { page: "v-clamshell", title: "Закрытие кламшелла" }
   };
-  function row(title, sub) {
-    return '<div class="nj-result-row pass">' +
-      '<span class="nj-r-ico"><svg class="ku-ico s"><use href="#i-check-check"/></svg></span>' +
+  function row(pass, title, subPass, subFail) {
+    return '<div class="nj-result-row ' + (pass ? "pass" : "fail") + '">' +
+      '<span class="nj-r-ico"><svg class="ku-ico s"><use href="#' + (pass ? "i-check-check" : "i-lock") + '"/></svg></span>' +
       '<div><div class="nj-result-row__t">' + title + '</div>' +
-      '<div class="nj-result-row__s">' + sub + '</div></div></div>';
+      '<div class="nj-result-row__s">' + (pass ? subPass : subFail) + '</div></div></div>';
   }
   function vidCard(key) {
     var v = VIDS[key], watched = isDone("vid-" + key);
@@ -502,15 +533,23 @@
   function buildResults() {
     var rowsEl = document.getElementById("res-rows"), vidsEl = document.getElementById("res-videos");
     if (!rowsEl || !vidsEl) return;
-    rowsEl.innerHTML = row("Сборка Воппера", "Пройдено — порядок и скорость.") +
-                       row("Закрытие и заворот упаковки", "Пройдено — сторона и позиция.");
+    var asmOk = isDone("assembly"), packOk = isDone("packaging"), allOk = asmOk && packOk;
+    rowsEl.innerHTML =
+      row(asmOk, "Сборка Воппера", "Пройдено — порядок и скорость.", "Не пройдено — вернись в главу 3.") +
+      row(packOk, "Закрытие и заворот упаковки", "Пройдено — сторона и позиция.", "Не пройдено — вернись в главу 3.");
     vidsEl.innerHTML = vidCard("whopper") + vidCard("paper") + vidCard("clamshell");
     var lead = document.getElementById("res-lead"), vnote = document.getElementById("res-vid-note"),
         note = document.getElementById("res-complete-note"), btn = document.getElementById("res-complete");
-    if (lead) lead.textContent = "Обе игры пройдены — отличная работа!";
+    if (lead) lead.textContent = allOk
+      ? "Обе игры пройдены — отличная работа!"
+      : "Чтобы завершить курс, пройди оба тренажёра в главе 3.";
     if (vnote) vnote.textContent = "Эти видео — по желанию, для закрепления приёмов.";
-    if (note) note.textContent = "Всё готово — можно завершать курс.";
-    if (btn) btn.disabled = false;
+    // Завершить можно ТОЛЬКО пройдя оба тренажёра (гейта на переходе мало:
+    // на этот экран можно попасть и кнопкой «К результатам» с видео).
+    if (btn) btn.disabled = !allOk;
+    if (note) note.textContent = allOk
+      ? "Всё готово — можно завершать курс."
+      : "Кнопка откроется после прохождения тренажёров.";
   }
   window.njWatched = function (key) { markDone("vid-" + key); kuNavigate("results"); };
 
@@ -576,12 +615,19 @@
     var c2 = document.getElementById("ku-home-card-2"), c3 = document.getElementById("ku-home-card-3");
     if (c2) c2.classList.toggle("locked", !isDone("ch1-seen"));
     if (c3) c3.classList.toggle("locked", !isDone("sauce-test"));
+
+    // Тренажёры строго последовательно: упаковка открывается после сборки
+    var asmOk = isDone("assembly"), packOk = isDone("packaging");
+    var lock = document.getElementById("pack-lock"), body = document.getElementById("pack-body");
+    if (lock) lock.hidden = asmOk;
+    if (body) body.hidden = !asmOk;
+
     var nx = document.getElementById("ch3-next");
     if (nx) {
-      var ready = isDone("assembly") && isDone("packaging");
+      var ready = asmOk && packOk;
       nx.disabled = !ready;
       var hint = document.getElementById("ch3-next-hint");
-      if (hint) hint.textContent = ready ? "" : "Пройди обе игры, чтобы продолжить.";
+      if (hint) hint.textContent = ready ? "" : (asmOk ? "Пройди упаковку, чтобы продолжить." : "Пройди сборку Воппера, чтобы продолжить.");
     }
   }
   function njManageVideos() {                            // грузим видео активной страницы, гасим остальные (R16)

@@ -275,13 +275,13 @@
         <div class="ku-space s"></div>
         <h2 class="ku-h1">Стандарты сборки и упаковки</h2>
         <div class="ku-space s"></div>
-        <p class="ku-lead">Две игры: собери Воппер в правильном порядке, затем закрой и заверни упаковку. В конце получишь обратную связь по каждой.</p>
+        <p class="ku-lead">Две игры: собери Воппер в правильном порядке, затем закрой и заверни упаковку. В конце получишь обратную связь по каждому этапу.</p>
         <div class="ku-space l"></div>
 
         <!-- ── ИГРА 1 — СОБЕРИ ВОППЕР ── -->
         <div class="ku-exercise ku-reveal" data-ku-id="assembly" id="asm">
           <div class="ku-exercise__label">Игра 1 · Собери Воппер</div>
-          <p class="ku-small ku-soft" id="asm-instr">Перетаскивай или нажимай ингредиенты из набора, чтобы собрать Воппер в правильном порядке. Добавленные ингредиенты можно менять местами и размещать между уже добавленными слоями. Крестик — удалить ингредиент, «Сбросить» — начать сборку заново.</p>
+          <p class="ku-small ku-soft" id="asm-instr">Перетаскивай или нажимай на ингредиенты из набора, чтобы собрать Воппер в правильном порядке. Добавленные ингредиенты можно менять местами и размещать между уже добавленными слоями. Крестик — удалить ингредиент, «Сбросить» — начать сборку заново.</p>
           <div class="ku-space s"></div>
 
           <div class="nj-rounds" id="asm-rounds">
@@ -313,6 +313,16 @@
         <div class="ku-exercise ku-reveal" data-ku-id="packaging" id="pack">
           <div class="ku-exercise__label">Игра 2 · Закрой и заверни</div>
 
+          <!-- Замок: упаковка открывается только после сборки -->
+          <div class="nj-lock-note" id="pack-lock">
+            <svg class="ku-ico l"><use href="#i-lock"/></svg>
+            <div>
+              <div class="nj-lock-note__t">Сначала собери Воппер</div>
+              <p class="ku-small ku-soft" style="margin:0">Упаковка откроется, когда пройдёшь игру 1.</p>
+            </div>
+          </div>
+
+          <div id="pack-body" hidden>
           <!-- Шаг 1: поворот бумаги -->
           <div class="nj-pack-step active" id="pack-step-1">
             <p class="ku-small ku-soft">Разверни оберточную бумагу правильной стороной для сборки. Нажимай на лист, чтобы повернуть его, и подтверди.</p>
@@ -352,6 +362,7 @@
             </div>
             <div class="ku-feedback" id="fb-burger"></div>
           </div>
+          </div><!-- /pack-body -->
         </div>
 
         <div class="next-row" style="margin-top:var(--ku-space-l);display:flex;flex-direction:column;align-items:center;gap:.6rem">
