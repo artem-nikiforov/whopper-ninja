@@ -550,26 +550,22 @@
     if (note) note.textContent = allOk
       ? "Всё готово — можно завершать курс."
       : "Кнопка откроется после прохождения тренажёров.";
-    if (njIsCompleted()) njShowDone();                  // вернулись на экран уже завершённого курса
+    // ВАЖНО: экран завершения НЕ показываем при восстановлении состояния.
+    // Иначе повторно открытый (уже завершённый) SCO сразу закрывал сессию.
   }
   window.njWatched = function (key) { markDone("vid-" + key); kuNavigate("results"); };
 
-  /* Экран после завершения курса: «Курс завершён! Окно закроется автоматически».
-     Показывается по событию ku:completed (клик по «Завершить») и при повторном
-     заходе на результаты, если курс уже был завершён. */
+  /* Экран «Курс завершён» — ТОЛЬКО по реальному клику «Завершить курс»
+     (событие ku:completed рантайм шлёт лишь из обработчика клика, не при
+     восстановлении). window.close() пытаемся только после явного завершения:
+     в отдельном окне LMS закроется, во фрейме безопасно игнорируется. */
   function njShowDone() {
     var finish = document.getElementById("res-finish"), done = document.getElementById("res-done");
     if (!done || !done.hidden) return;                  // уже показан
     if (finish) finish.hidden = true;
     done.hidden = false;
     done.scrollIntoView({ behavior: "smooth", block: "center" });
-    // Автозакрытие: если LMS открыла курс в отдельном окне — закроется само;
-    // во фрейме window.close() безопасно игнорируется, надпись уже показана.
     setTimeout(function () { try { window.close(); } catch (e) {} }, 3000);
-  }
-  function njIsCompleted() {
-    var b = document.querySelector("[data-ku-complete]");
-    return !!(b && b.classList.contains("is-completed"));
   }
   document.addEventListener("ku:completed", njShowDone);
 
