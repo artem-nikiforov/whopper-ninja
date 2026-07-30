@@ -550,21 +550,27 @@
     if (note) note.textContent = allOk
       ? "Всё готово — можно завершать курс."
       : "Кнопка откроется после прохождения тренажёров.";
-    // ВАЖНО: экран завершения НЕ показываем при восстановлении состояния.
-    // Иначе повторно открытый (уже завершённый) SCO сразу закрывал сессию.
+    // Если курс уже завершён (рантайм навесил is-completed из восстановленного
+    // состояния), кнопка становится зелёной и pointer-events:none — мёртвой.
+    // Поэтому вместо неё показываем экран «Курс завершён» (БЕЗ автозакрытия —
+    // window.close только по реальному клику, не при восстановлении).
+    if (btn && btn.classList.contains("is-completed")) njRevealDone();
   }
   window.njWatched = function (key) { markDone("vid-" + key); kuNavigate("results"); };
 
-  /* Экран «Курс завершён» — ТОЛЬКО по реальному клику «Завершить курс»
-     (событие ku:completed рантайм шлёт лишь из обработчика клика, не при
-     восстановлении). window.close() пытаемся только после явного завершения:
-     в отдельном окне LMS закроется, во фрейме безопасно игнорируется. */
-  function njShowDone() {
+  /* Показ экрана «Курс завершён» — безопасно, без закрытия окна. */
+  function njRevealDone() {
     var finish = document.getElementById("res-finish"), done = document.getElementById("res-done");
     if (!done || !done.hidden) return;                  // уже показан
     if (finish) finish.hidden = true;
     done.hidden = false;
     done.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  /* По реальному клику «Завершить курс» (событие ku:completed рантайм шлёт
+     только из обработчика клика): экран + попытка закрыть окно (в отдельном
+     окне LMS закроется, во фрейме безопасно игнорируется). */
+  function njShowDone() {
+    njRevealDone();
     setTimeout(function () { try { window.close(); } catch (e) {} }, 3000);
   }
   document.addEventListener("ku:completed", njShowDone);
