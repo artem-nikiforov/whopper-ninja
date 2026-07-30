@@ -12,7 +12,7 @@
   <!-- ?v=… — версия для сброса кеша. Меняй при каждой правке css/js курса,
        иначе браузер/LMS может отдать старый ninja.js и рассинхронить с HTML. -->
   <link rel="stylesheet" href="css/kuds.css">
-  <link rel="stylesheet" href="css/ninja.css?v=250730c">
+  <link rel="stylesheet" href="css/ninja.css?v=250730d">
 </head>
 <body>
 
@@ -386,22 +386,14 @@
         <div class="ku-stack s" id="res-videos"></div>
         <div class="ku-space l"></div>
 
-        <!-- Завершение -->
-        <div class="ku-center" id="res-finish">
+        <!-- Завершение: кнопка ВСЕГДА активна, просто отдаёт SCORM complete -->
+        <div class="ku-center">
           <div class="ku-icon-badge solid" style="margin-inline:auto"><svg class="ku-ico"><use href="#i-trophy"/></svg></div>
           <div class="ku-space s"></div>
-          <button class="ku-btn primary l" data-ku-complete id="res-complete" disabled>
+          <button class="ku-btn primary l" data-ku-complete id="res-complete">
             <svg class="ku-ico"><use href="#i-check"/></svg> Завершить курс
           </button>
-          <p class="ku-caption" id="res-complete-note" style="margin-top:0.8em">Сначала посмотри обязательные видео выше.</p>
-        </div>
-
-        <!-- Экран после завершения -->
-        <div class="ku-center nj-done" id="res-done" hidden>
-          <div class="ku-icon-badge solid" style="margin-inline:auto"><svg class="ku-ico"><use href="#i-check-check"/></svg></div>
-          <div class="ku-space s"></div>
-          <h3 class="ku-h2">Курс завершён!</h3>
-          <p class="ku-lead">Окно курса закроется автоматически.</p>
+          <p class="ku-caption" id="res-complete-note" style="margin-top:0.8em">Нажми, чтобы завершить курс.</p>
         </div>
       </div>
     </section>
@@ -475,6 +467,6 @@
 
 <script src="js/kuds.js"></script>
 <script src="js/ku-scorm.js"></script>
-<script src="js/ninja.js?v=250730c"></script>
+<script src="js/ninja.js?v=250730d"></script>
 </body>
 </html>

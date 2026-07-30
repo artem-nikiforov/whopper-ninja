@@ -232,6 +232,17 @@
   background: var(--ku-success); color: #fff; border-color: transparent;
 }
 
+/* Кнопка «Завершить курс» ВСЕГДА активна и кликабельна. Рантайм ДС после
+   срабатывания/восстановления вешает .is-completed (зелёный фон +
+   pointer-events:none) — перебиваем, чтобы кнопку можно было нажать всегда. */
+[data-ku-complete],
+[data-ku-complete].is-completed {
+  pointer-events: auto !important;
+  background: var(--ku-brand);
+  box-shadow: var(--ku-shadow-brand);
+  cursor: pointer;
+}
+
 /* Замок на втором тренажёре, пока не пройден первый */
 .nj-lock-note {
   display: flex; align-items: center; gap: .8rem;

@@ -544,36 +544,12 @@
       ? "Обе игры пройдены — отличная работа!"
       : "Чтобы завершить курс, пройди оба тренажёра в главе 3.";
     if (vnote) vnote.textContent = "Эти видео — по желанию, для закрепления приёмов.";
-    // Завершить можно ТОЛЬКО пройдя оба тренажёра (гейта на переходе мало:
-    // на этот экран можно попасть и кнопкой «К результатам» с видео).
-    if (btn) btn.disabled = !allOk;
-    if (note) note.textContent = allOk
-      ? "Всё готово — можно завершать курс."
-      : "Кнопка откроется после прохождения тренажёров.";
-    // Если курс уже завершён (рантайм навесил is-completed из восстановленного
-    // состояния), кнопка становится зелёной и pointer-events:none — мёртвой.
-    // Поэтому вместо неё показываем экран «Курс завершён» (БЕЗ автозакрытия —
-    // window.close только по реальному клику, не при восстановлении).
-    if (btn && btn.classList.contains("is-completed")) njRevealDone();
+    // Кнопка «Завершить курс» ВСЕГДА активна и просто отдаёт SCORM complete
+    // (обработчик клика вешает рантайм ku-scorm). Никаких гейтов и экранов.
+    if (btn) btn.disabled = false;
+    if (note) note.textContent = "Нажми, чтобы завершить курс.";
   }
   window.njWatched = function (key) { markDone("vid-" + key); kuNavigate("results"); };
-
-  /* Показ экрана «Курс завершён» — безопасно, без закрытия окна. */
-  function njRevealDone() {
-    var finish = document.getElementById("res-finish"), done = document.getElementById("res-done");
-    if (!done || !done.hidden) return;                  // уже показан
-    if (finish) finish.hidden = true;
-    done.hidden = false;
-    done.scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-  /* По реальному клику «Завершить курс» (событие ku:completed рантайм шлёт
-     только из обработчика клика): экран + попытка закрыть окно (в отдельном
-     окне LMS закроется, во фрейме безопасно игнорируется). */
-  function njShowDone() {
-    njRevealDone();
-    setTimeout(function () { try { window.close(); } catch (e) {} }, 3000);
-  }
-  document.addEventListener("ku:completed", njShowDone);
 
   /* ══ ТЕСТ ПО СОУСУ (сабмит, не блокирующий) ════════════════════════════ */
   document.addEventListener("click", function (e) {     // одиночный выбор варианта
