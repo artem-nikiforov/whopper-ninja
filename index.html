@@ -91,7 +91,7 @@
           <button class="ku-card ku-chapter locked" id="ku-home-card-2" style="width:100%;text-align:left" onclick="njGoChapter('ch2')">
             <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
             <div class="ku-chapter__num">2</div>
-            <div class="ku-chapter__body"><h3>Тест по соусу</h3><p>5 вопросов</p></div>
+            <div class="ku-chapter__body"><h3>Тест по соусу</h3><p>4 вопроса</p></div>
           </button>
           <button class="ku-card ku-chapter locked" id="ku-home-card-3" style="width:100%;text-align:left" onclick="njGoChapter('ch3')">
             <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
@@ -139,7 +139,7 @@
         <div class="ku-space s"></div>
         <h2 class="ku-h1">Тест по соусу</h2>
         <div class="ku-space s"></div>
-        <p class="ku-lead">Ответь на 5 вопросов и нажми «Проверить».</p>
+        <p class="ku-lead">Ответь на 4 вопроса и нажми «Проверить».</p>
         <div class="ku-space m"></div>
 
         <div class="ku-exercise ku-reveal" data-ku-id="sauce-test" id="sauce-test">
@@ -154,20 +154,9 @@
             </div>
           </div>
 
-          <!-- Q2 -->
+          <!-- Q2 — сопоставление -->
           <div class="nj-q" data-q="2">
-            <div class="nj-q__text">2. Ты добавляешь соус и видишь, что на сквизере нет наклейки «Вкус Месяца». Как поступить?</div>
-            <div class="nj-choices">
-              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Добавить соус, если уверен, что в сквизере нужный соус</button>
-              <button type="button" class="nj-choice" data-correct="1"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Нанести на сквизер наклейку</button>
-              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Перелить соус в другой сквизер с наклейкой</button>
-              <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> Использовать соус, как обычно</button>
-            </div>
-          </div>
-
-          <!-- Q3 — сопоставление -->
-          <div class="nj-q" data-q="3">
-            <div class="nj-q__text">3. Сопоставь действие при работе с новым соусом с его целью</div>
+            <div class="nj-q__text">2. Сопоставь действие при работе с новым соусом с его целью</div>
             <div class="nj-match">
               <div class="nj-match__row">
                 <span class="nj-match__a">Наносить наклейку «Вкус месяца»</span>
@@ -199,9 +188,9 @@
             </div>
           </div>
 
-          <!-- Q4 -->
-          <div class="nj-q" data-q="4">
-            <div class="nj-q__text">4. Ты собираешь Воппер с соусом «Чёрный Ниндзя». Как правильно нанести соус?</div>
+          <!-- Q3 -->
+          <div class="nj-q" data-q="3">
+            <div class="nj-q__text">3. Ты собираешь Воппер с соусом «Чёрный Ниндзя». Как правильно нанести соус?</div>
             <div class="nj-choices">
               <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 2 оборота, 10 грамм</button>
               <button type="button" class="nj-choice" data-correct="1"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 3 оборота, 14 грамм</button>
@@ -210,9 +199,9 @@
             </div>
           </div>
 
-          <!-- Q5 -->
-          <div class="nj-q" data-q="5">
-            <div class="nj-q__text">5. Ты собираешь Воппер Ролл с соусом «Чёрный Ниндзя». Как правильно нанести соус?</div>
+          <!-- Q4 -->
+          <div class="nj-q" data-q="4">
+            <div class="nj-q__text">4. Ты собираешь Воппер Ролл с соусом «Чёрный Ниндзя». Как правильно нанести соус?</div>
             <div class="nj-choices">
               <button type="button" class="nj-choice"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 3 оборота, 14 грамм</button>
               <button type="button" class="nj-choice" data-correct="1"><span class="nj-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span> 5 вершин зигзагом, 14 грамм</button>
@@ -329,7 +318,7 @@
             <div class="ku-space s"></div>
             <div class="nj-paper-stage">
               <img class="nj-paper" id="pack-paper" src="assets/paper.png" alt="Оберточная бумага Burger King" tabindex="0" role="button" aria-label="Повернуть бумагу" draggable="false">
-              <span class="nj-paper-badge"><svg class="ku-ico s"><use href="#i-rotate"/></svg> Нажми, чтобы повернуть</span>
+              <svg class="nj-paper-turn" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-rotate"/></svg>
             </div>
             <div class="ku-space s"></div>
             <div class="nj-controls">
@@ -396,13 +385,21 @@
         <div class="ku-space l"></div>
 
         <!-- Завершение -->
-        <div class="ku-center">
+        <div class="ku-center" id="res-finish">
           <div class="ku-icon-badge solid" style="margin-inline:auto"><svg class="ku-ico"><use href="#i-trophy"/></svg></div>
           <div class="ku-space s"></div>
           <button class="ku-btn primary l" data-ku-complete id="res-complete" disabled>
             <svg class="ku-ico"><use href="#i-check"/></svg> Завершить курс
           </button>
           <p class="ku-caption" id="res-complete-note" style="margin-top:0.8em">Сначала посмотри обязательные видео выше.</p>
+        </div>
+
+        <!-- Экран после завершения -->
+        <div class="ku-center nj-done" id="res-done" hidden>
+          <div class="ku-icon-badge solid" style="margin-inline:auto"><svg class="ku-ico"><use href="#i-check-check"/></svg></div>
+          <div class="ku-space s"></div>
+          <h3 class="ku-h2">Курс завершён!</h3>
+          <p class="ku-lead">Окно курса закроется автоматически.</p>
         </div>
       </div>
     </section>

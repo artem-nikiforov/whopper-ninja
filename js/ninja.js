@@ -550,8 +550,28 @@
     if (note) note.textContent = allOk
       ? "Всё готово — можно завершать курс."
       : "Кнопка откроется после прохождения тренажёров.";
+    if (njIsCompleted()) njShowDone();                  // вернулись на экран уже завершённого курса
   }
   window.njWatched = function (key) { markDone("vid-" + key); kuNavigate("results"); };
+
+  /* Экран после завершения курса: «Курс завершён! Окно закроется автоматически».
+     Показывается по событию ku:completed (клик по «Завершить») и при повторном
+     заходе на результаты, если курс уже был завершён. */
+  function njShowDone() {
+    var finish = document.getElementById("res-finish"), done = document.getElementById("res-done");
+    if (!done || !done.hidden) return;                  // уже показан
+    if (finish) finish.hidden = true;
+    done.hidden = false;
+    done.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Автозакрытие: если LMS открыла курс в отдельном окне — закроется само;
+    // во фрейме window.close() безопасно игнорируется, надпись уже показана.
+    setTimeout(function () { try { window.close(); } catch (e) {} }, 3000);
+  }
+  function njIsCompleted() {
+    var b = document.querySelector("[data-ku-complete]");
+    return !!(b && b.classList.contains("is-completed"));
+  }
+  document.addEventListener("ku:completed", njShowDone);
 
   /* ══ ТЕСТ ПО СОУСУ (сабмит, не блокирующий) ════════════════════════════ */
   document.addEventListener("click", function (e) {     // одиночный выбор варианта
@@ -565,7 +585,7 @@
     var ex = document.getElementById("sauce-test"); if (!ex) return;
     var qs = ex.querySelectorAll(".nj-q"), answered = true, correct = 0, total = qs.length;
     qs.forEach(function (q) {
-      if (q.getAttribute("data-q") === "3") {           // сопоставление
+      if (q.querySelector(".nj-match")) {                // сопоставление
         var sels = q.querySelectorAll(".nj-match__sel"), allSel = true, allRight = true;
         sels.forEach(function (s) {
           s.classList.remove("nj-ok", "nj-bad");

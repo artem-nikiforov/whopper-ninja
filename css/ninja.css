@@ -285,13 +285,15 @@
   transform: rotate(var(--nj-rot, 0deg)) scaleX(-1);
 }
 .nj-paper:focus-visible { outline: 3px solid var(--ku-brand); outline-offset: 3px; }
-.nj-paper-badge {
-  position: absolute; left: 50%; bottom: .7rem; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: .4rem;
-  padding: .3rem .7rem; border-radius: var(--ku-radius-pill);
-  background: color-mix(in srgb, var(--ku__night-950, #100b07) 70%, transparent);
-  color: var(--ku-text); font-size: .78rem; font-weight: 600;
-  border: 1px solid var(--ku-border); pointer-events: none;
+/* Полупрозрачная иконка поворота ПО ЦЕНТРУ листа: подсказывает, что жать
+   надо на бумагу. pointer-events:none — клик проходит сквозь неё на лист. */
+.nj-paper-turn {
+  position: absolute; left: 50%; top: 50%;
+  width: clamp(2.6rem, 14%, 4rem); height: auto;
+  transform: translate(-50%, -50%);
+  color: var(--ku__night-950, #100b07); opacity: .38;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(255, 255, 255, .5));
 }
 .nj-arrow-to {
   position: absolute; left: 50%; bottom: -.2rem; transform: translateX(-50%);
